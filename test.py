@@ -17,7 +17,7 @@ os.environ["PATH"] += os.pathsep + ffmpeg_bin
 
 name = "VID_20200130_185053.mp4"
 # name = "VID_20191207_234942.mp4"
-path = "/volume1/photo/phone/DCIM/Camera"
+path = "/volume1/photo/phone/DCIM/Camera/"
 # path = "/home/junn/sample/"
 data_keys = ["DateTimeOriginal", "DateTime", "creation_time"]
 #
