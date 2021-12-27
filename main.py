@@ -1,3 +1,4 @@
+import sys
 import configparser
 import logging
 import os
@@ -135,12 +136,13 @@ def main():
                 # print(f"{name} : {get_pic_meta_date(source_path, name, data_keys)}")
                 sort_file(source_path, name, get_pic_meta_date(source_path, name, data_keys), dir_list)
             else:
-                logging.error(f"Unsortable file '{name}'")
+                logger.error(f"Unsortable file '{name}'")
     logger.info(f"Execution end at {datetime.now()}")
 
 
 # MAIN
 if __name__ == '__main__':
+    sys.path.append("/usr/bin/ffmpeg")
     logging.basicConfig(filename="log")
     log_handler = RotatingFileHandler("log", maxBytes=5 * 1024 * 1024)
     logger = logging.getLogger(__name__)
