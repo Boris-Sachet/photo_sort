@@ -12,7 +12,7 @@ ffmpeg_bin = "/usr/bin/ffmpeg"
 # sys.path.append(ffprobe_install)
 
 # os.environ["PATH"] += os.pathsep + ffmpeg_install
-os.environ["PATH"] += os.pathsep + ffprobe_install
+# os.environ["PATH"] += os.pathsep + ffprobe_install
 # os.environ["PATH"] += os.pathsep + ffmpeg_bin
 
 print(os.environ["PATH"])
