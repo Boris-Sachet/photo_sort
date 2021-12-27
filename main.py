@@ -46,6 +46,8 @@ def get_pic_meta_date(path: str, name: str, data_keys: list) -> datetime:
                 return datetime.strptime(exif.get(key).split(' ')[0], "%Y:%m:%d")
         else:
             return None
+    except FileNotFoundError as e:
+        logger.error(f"{name} metadata reading : {e}")
     except Exception as e:
         logger.error(f"{name} metadata reading : {e}")
 
@@ -61,6 +63,8 @@ def get_vid_meta_date(path: str, name: str, data_keys: list) -> datetime:
             return None
     except ffmpeg.Error as e:
         logger.error(f"{name} metadata reading : {e.stderr}")
+    except FileNotFoundError as e:
+        logger.error(f"{name} metadata reading : {e}")
 
 
 def list_folders(paths: list, ignore: list) -> list:
