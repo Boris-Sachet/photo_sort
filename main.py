@@ -142,7 +142,7 @@ def main():
 
 # MAIN
 if __name__ == '__main__':
-    sys.path.append("/usr/bin/ffmpeg")
+    sys.path.append("/volume1/@appstore/ffmpeg")
     logging.basicConfig(filename="log")
     log_handler = RotatingFileHandler("log", maxBytes=5 * 1024 * 1024)
     logger = logging.getLogger(__name__)
