@@ -10,13 +10,19 @@ from dated_folder import DatedFolder
 
 
 def init(config_path: str, config_file: str):
+    """
+    This method initialize the application and create the config directory and the config file with default values
+    if it does not exist.
+    :param config_path: Configuration path
+    :param config_file: Configuration file name
+    """
     os.makedirs(config_path, 0o744, True)
     if not os.path.isfile(os.path.join(config_path, config_file)):
         # Insert default config if file does not exist
         config = {
-            "source_path": "/home/junn/sample/ # Files source folder path",
+            "source_path": "/volume1/photo/phone/DCIM/Camera # Files source folder path",
             "source_ignore": " # Comma separated list of files names to ignore",
-            "storage_paths": "/home/junn/sample/ # Comma separated list of path to look for storage folders",
+            "storage_paths": "/volume1/photo/photo, /volume1/photo/photo/Mélo # Comma separated list of path to look for storage folders",
             "storage_ignore": " # Comma separated list of path to ignore",
             "data_keys": "DateTimeOriginal, DateTime, creation_time # Comma separated list of metadata param to look for retrieving the date of the file"
         }
