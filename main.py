@@ -1,6 +1,8 @@
 import configparser
+import logging
 import os
 from datetime import datetime
+from logging.handlers import RotatingFileHandler
 
 from PIL import Image, ExifTags
 # from pprint import pprint
@@ -18,12 +20,14 @@ def init(config_path: str, config_file: str):
     """
     os.makedirs(config_path, 0o744, True)
     if not os.path.isfile(os.path.join(config_path, config_file)):
+        logging.info("Creating default configuration file")
         # Insert default config if file does not exist
         config = {
             "source_path": "/volume1/photo/phone/DCIM/Camera # Files source folder path",
             "source_ignore": " # Comma separated list of files names to ignore",
             "storage_paths": "/volume1/photo/photo, /volume1/photo/photo/Mélo # Comma separated list of path to look for storage folders",
             "storage_ignore": " # Comma separated list of path to ignore",
+            "log_level": "info # Choose between debug, info, warning, error, critical",
             "data_keys": "DateTimeOriginal, DateTime, creation_time # Comma separated list of metadata param to look for retrieving the date of the file"
         }
         configF = open(os.path.join(config_path, config_file), "a")
@@ -61,7 +65,7 @@ def list_folders(paths: list, ignore: list) -> list:
     for path in paths:
         for name in os.listdir(path):
             if os.path.isdir(f"{path}{name}") and name not in ignore:
-                result = DatedFolder(name, path)
+                result = DatedFolder(name, path, data_logger)
                 if result.isValid:
                     results.append(result)
     return results
@@ -72,10 +76,20 @@ def sort_file(source_path: str, file: str, date: datetime, storage_paths: list):
         for path in storage_paths:
             if path.begin <= date <= path.end:
                 if not os.path.isfile(f"{source_path}"):
-                    print(f"Moving '{file}' to '{str(path)}'")
+                    logger.debug(f"Moving '{file}' to '{path.name}'")
                     return
                 else:
                     return
+
+
+def log_level(level: str) -> int:
+    return {
+        "debug": logging.DEBUG,
+        "info": logging.INFO,
+        "warning": logging.WARNING,
+        "error": logging.ERROR,
+        "critical": logging.CRITICAL
+    }.get(level, logging.INFO)
 
 
 def main():
@@ -87,7 +101,14 @@ def main():
     config = configparser.ConfigParser()
     config.read(os.path.join(config_path, config_file))
 
+    # Configure logs
+
+    log_lv = log_level(config["conf"]["source_path"].split('#')[0].strip())
+    logger.setLevel(log_lv)
+    data_logger.setLevel(log_lv)
+
     # Load config from conf file
+    logger.info(f"Execution start at {datetime.now()}")
     data_keys = [item.strip() for item in config["conf"]["data_keys"].split('#')[0].split(',')]
     source_path = config["conf"]["source_path"].split('#')[0].strip()
     if not source_path.endswith('/'):
@@ -107,9 +128,14 @@ def main():
                 # print(f"{name} : {get_pic_meta_date(source_path, name, data_keys)}")
                 sort_file(source_path, name, get_pic_meta_date(source_path, name, data_keys), dir_list)
             else:
-                print(f"ERROR: Unsortable file '{name}'")
+                logging.error(f"Unsortable file '{name}'")
+    logger.info(f"Execution end at {datetime.now()}")
 
 
 # MAIN
 if __name__ == '__main__':
+    logging.basicConfig(filename="log")
+    log_handler = RotatingFileHandler("log", maxBytes=5 * 1024 * 1024)
+    logger = logging.getLogger(__name__)
+    data_logger = logging.getLogger("datafold")
     main()

@@ -14,10 +14,10 @@ def last_day_of_month(any_day):
 
 class DatedFolder:
 
-    def __init__(self, name: str, path: str):
+    def __init__(self, name: str, path: str, logger):
+        self.logger = logger
         self.name = name
         self.path = path if path.endswith('/') else path + '/'
-        self.desc = name.split(' ', 1)[1] if len(name.split(' ', 1)[1]) == 2 else ""
         self.begin = date_time.now()
         self.end = self.begin
         self.isValid = True
@@ -68,7 +68,7 @@ class DatedFolder:
                 self.end = date_time.strptime(dates[1], "%Y-%m-%d")
 
             else:
-                print(f"ERROR: Folder name '{self.name}' is invalid")
+                self.logger.error(f"Folder name '{self.name}' is invalid")
                 self.isValid = False
 
         # Multiple days of the same month folder
@@ -78,11 +78,11 @@ class DatedFolder:
                 self.begin = date_time.strptime(dates[0], "%Y-%m-%d")
                 self.end = self.begin.replace(day=int(dates[len(dates) - 1]))
             else:
-                print(f"ERROR: Folder name '{self.name}' is invalid")
+                self.logger.error(f"Folder name '{self.name}' is invalid")
                 self.isValid = False
 
         else:
-            print(f"ERROR: Folder name '{self.name}' is invalid")
+            self.logger.error(f"Folder name '{self.name}' is invalid")
             self.isValid = False
 
     def __str__(self):
