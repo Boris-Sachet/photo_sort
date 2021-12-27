@@ -38,13 +38,16 @@ def init(config_path: str, config_file: str):
 
 
 def get_pic_meta_date(path: str, name: str, data_keys: list) -> datetime:
-    img = Image.open(f"{path}{name}")
-    exif = {ExifTags.TAGS[k]: v for k, v in img._getexif().items() if k in ExifTags.TAGS}
-    for key in data_keys:
-        if key in exif.keys():
-            return datetime.strptime(exif.get(key).split(' ')[0], "%Y:%m:%d")
-    else:
-        return None
+    try:
+        img = Image.open(f"{path}{name}")
+        exif = {ExifTags.TAGS[k]: v for k, v in img._getexif().items() if k in ExifTags.TAGS}
+        for key in data_keys:
+            if key in exif.keys():
+                return datetime.strptime(exif.get(key).split(' ')[0], "%Y:%m:%d")
+        else:
+            return None
+    except Exception as e:
+        logger.error(e)
 
 
 def get_vid_meta_date(path: str, name: str, data_keys: list) -> datetime:
@@ -57,7 +60,7 @@ def get_vid_meta_date(path: str, name: str, data_keys: list) -> datetime:
         else:
             return None
     except ffmpeg.Error as e:
-        print(e.stderr)
+        logger.error(e.stderr)
 
 
 def list_folders(paths: list, ignore: list) -> list:
