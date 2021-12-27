@@ -11,8 +11,8 @@ ffmpeg_bin = "/usr/bin/ffmpeg"
 # sys.path.append(ffmpeg_install)
 # sys.path.append(ffprobe_install)
 
-os.environ["PATH"] += os.pathsep + ffmpeg_install
-os.environ["PATH"] += os.pathsep + ffprobe_install
+# os.environ["PATH"] += os.pathsep + ffmpeg_install
+# os.environ["PATH"] += os.pathsep + ffprobe_install
 os.environ["PATH"] += os.pathsep + ffmpeg_bin
 
 name = "VID_20200130_185053.mp4"
