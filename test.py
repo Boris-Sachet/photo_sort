@@ -1,6 +1,9 @@
+import sys
 from datetime import datetime
 
 import ffmpeg
+sys.path.append("/var/packages/MediaServer/target/bin/ffmpeg")
+sys.path.append("/var/packages/MediaServer/target/bin/ffprobe")
 
 name = "VID_20200130_185053.mp4"
 path = "/volume1/photo/phone/DCIM/Camera"
