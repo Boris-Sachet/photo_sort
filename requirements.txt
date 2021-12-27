@@ -1,3 +1,4 @@
 Pillow>=8.4.0
 ffmpeg-python>=0.2.0
+ffprobe-python>=1.0.3
 configparser>=5.2.0
