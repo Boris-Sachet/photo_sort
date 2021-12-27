@@ -22,6 +22,7 @@ path = "/volume1/photo/phone/DCIM/Camera/"
 data_keys = ["DateTimeOriginal", "DateTime", "creation_time"]
 #
 file = f"{path}{name}"
+print(file)
 vid = ffmpeg.probe(file)['streams']
 # vid = ffprobe.FFProbe(file).streams
 for key in data_keys:
