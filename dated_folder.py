@@ -1,4 +1,5 @@
 import datetime
+import os.path
 from datetime import datetime as date_time
 
 
@@ -88,4 +89,4 @@ class DatedFolder:
         return f"{self.name} - {self.begin} - {self.end}"
 
     def get_path(self) -> str:
-        return f"{self.path}{self.name}"
+        return os.path.join(self.path, self.name)

@@ -1,3 +1,4 @@
+import configparser
 import os
 from datetime import datetime
 
@@ -6,6 +7,24 @@ from PIL import Image, ExifTags
 import ffmpeg
 
 from dated_folder import DatedFolder
+
+
+def init(config_path: str, config_file: str):
+    os.makedirs(config_path, 0o744, True)
+    if not os.path.isfile(os.path.join(config_path, config_file)):
+        # Insert default config if file does not exist
+        config = {
+            "source_path": "/home/junn/sample/ # Files source folder path",
+            "source_ignore": " # Comma separated list of files names to ignore",
+            "storage_paths": "/home/junn/sample/ # Comma separated list of path to look for storage folders",
+            "storage_ignore": " # Comma separated list of path to ignore",
+            "data_keys": "DateTimeOriginal, DateTime, creation_time # Comma separated list of metadata param to look for retrieving the date of the file"
+        }
+        configF = open(os.path.join(config_path, config_file), "a")
+        configF.write("[conf]\n")
+        for key, value in config.items():
+            configF.write(f"{key} = {value}\n")
+        configF.close()
 
 
 def get_pic_meta_date(path: str, name: str, data_keys: list) -> datetime:
@@ -35,7 +54,7 @@ def list_folders(paths: list, ignore: list) -> list:
     results = []
     for path in paths:
         for name in os.listdir(path):
-            if os.path.isdir(f"{path}{name}") and name.lower() not in ignore:
+            if os.path.isdir(f"{path}{name}") and name not in ignore:
                 result = DatedFolder(name, path)
                 if result.isValid:
                     results.append(result)
@@ -54,22 +73,27 @@ def sort_file(source_path: str, file: str, date: datetime, storage_paths: list):
 
 
 def main():
-    data_keys = ["DateTimeOriginal", "DateTime", "creation_time"]
-    source_path = "/home/junn/sample/"
-    # if not source_path.endswith('/'):
-    #     source_path += '/'
-    source_ignore = []
-    storage_paths = ["/home/junn/sample/"]
-    storage_ignore = []
+    config_path = f"{os.path.expanduser('~')}/.config/photosort/"
+    config_file = "config"
+    init(config_path, config_file)
+
+    # Read config
+    config = configparser.ConfigParser()
+    config.read(os.path.join(config_path, config_file))
+
+    # Load config from conf file
+    data_keys = [item.strip() for item in config["conf"]["data_keys"].split('#')[0].split(',')]
+    source_path = config["conf"]["source_path"].split('#')[0].strip()
+    if not source_path.endswith('/'):
+        source_path += '/'
+    source_ignore = [item.strip() for item in config["conf"]["source_ignore"].split('#')[0].split(',')]
+    storage_paths = [item.strip() for item in config["conf"]["storage_paths"].split('#')[0].split(',')]
+    storage_ignore = [item.strip() for item in config["conf"]["storage_ignore"].split('#')[0].split(',')]
+
+    # Read folders and sort files
     dir_list = list_folders(storage_paths, storage_ignore)
-
-    # for item in dir_list:
-    #     print(str(item))
-    # print()
-    # print()
-
     for name in os.listdir(source_path):
-        if os.path.isfile(f"{source_path}{name}") and name.lower() not in source_ignore:
+        if os.path.isfile(f"{source_path}{name}") and name not in source_ignore:
             if name.endswith(".mp4"):
                 # print(f"{name} : {get_vid_meta_date(source_path, name, data_keys)}")
                 sort_file(source_path, name, get_vid_meta_date(source_path, name, data_keys), dir_list)
