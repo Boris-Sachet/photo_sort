@@ -106,7 +106,7 @@ def main():
 
     # Configure logs
 
-    log_lv = log_level(config["conf"]["source_path"].split('#')[0].strip())
+    log_lv = log_level(config["conf"]["log_level"].split('#')[0].strip())
     logger.setLevel(log_lv)
     data_logger.setLevel(log_lv)
 
