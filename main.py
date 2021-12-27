@@ -47,7 +47,7 @@ def get_pic_meta_date(path: str, name: str, data_keys: list) -> datetime:
         else:
             return None
     except Exception as e:
-        logger.error(f"Picture metadata reading : {e}")
+        logger.error(f"{name} metadata reading : {e}")
 
 
 def get_vid_meta_date(path: str, name: str, data_keys: list) -> datetime:
@@ -60,7 +60,7 @@ def get_vid_meta_date(path: str, name: str, data_keys: list) -> datetime:
         else:
             return None
     except ffmpeg.Error as e:
-        logger.error(f"Picture metadata reading : {e.stderr}")
+        logger.error(f"{name} metadata reading : {e.stderr}")
 
 
 def list_folders(paths: list, ignore: list) -> list:
