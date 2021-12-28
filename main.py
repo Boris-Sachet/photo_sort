@@ -101,8 +101,8 @@ def list_folders(paths: list, ignore: list) -> list:
 
 
 def sort_file(source_path: str, file: str, date: datetime, storage_paths: list):
-    print(f"Sorting '{file}' - {date}")
     if date is not None:
+        print(f"Sorting '{file}' - {storage_paths}")
         for folder in storage_paths:
             print(f"{file} : {date}")
             print(f"{str(folder)}")
