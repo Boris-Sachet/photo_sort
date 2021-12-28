@@ -40,10 +40,12 @@ def init(config_path: str, config_file: str):
 
 
 def get_date_from_name(name: str) -> datetime:
+    print(f"Getting date from : {name.split('_')}")
     for string in name.split('_'):
         if len(string) == 8:
             try:
                 result = datetime.strptime(string, "%Y%m%d")
+                print(f"File {name} date is : {result}")
                 return result
             except ValueError:
                 pass
@@ -179,13 +181,9 @@ def main():
         for name in os.listdir(source_path):
             if os.path.isfile(f"{source_path}{name}") and name not in source_ignore:
                 if name.endswith(".mp4"):
-                    # print(f"{name} : {get_vid_meta_date(source_path, name, data_keys)}")
                     sort_file(source_path, name, get_vid_meta_date(source_path, name, data_keys), dir_list)
-                    # sort_file(source_path, name, get_date_from_name(name), dir_list)
                 elif name.endswith(".jpg"):
-                    # print(f"{name} : {get_pic_meta_date(source_path, name, data_keys)}")
                     sort_file(source_path, name, get_pic_meta_date(source_path, name, data_keys), dir_list)
-                    # sort_file(source_path, name, get_date_from_name(name), dir_list)
                 else:
                     logger.error(f"Unsortable file '{name}'")
     else:
