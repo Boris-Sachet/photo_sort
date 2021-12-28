@@ -40,18 +40,19 @@ def init(config_path: str, config_file: str):
 
 
 def get_date_from_name(name: str) -> datetime:
-    print(f"Getting date from : {name.split('_')}")
+    this_try = datetime.now()
+    print(f"{this_try} Getting date from : {name.split('_')}")
     for string in name.split('_'):
         if len(string) == 8:
             try:
                 result = datetime.strptime(string, "%Y%m%d")
-                print(f"File {name} date is : {result}")
+                print(f"{this_try} File {name} date is : {result}")
                 return result
             except ValueError:
                 pass
                 logger.debug(f"{name} : Can't convert '{string}' to datetime")
     else:
-        print(f"No date found in : {name.split('_')}")
+        print(f"{this_try} No date found in : {name.split('_')}")
         logger.error(f"{name} : No date found in filename")
         return None
 
