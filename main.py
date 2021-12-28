@@ -150,6 +150,7 @@ def main():
     storage_ignore = [item.strip() for item in config["conf"]["storage_ignore"].split('#')[0].split(',')]
 
     print(config["conf"]["log_level"].split('#')[0].strip())
+    print(logger.level)
     print(log_lv)
     print(data_keys)
     print(source_path)
