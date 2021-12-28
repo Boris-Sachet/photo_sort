@@ -184,6 +184,9 @@ def main():
 
     # Read folders and sort files
     dir_list = list_folders(storage_paths, storage_ignore)
+    for dir in dir_list:
+        print(str(dir))
+
     if len(dir_list) > 0:
         for name in os.listdir(source_path):
             if os.path.isfile(f"{source_path}{name}") and name not in source_ignore:
