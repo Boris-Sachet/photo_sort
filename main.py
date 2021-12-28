@@ -102,10 +102,13 @@ def list_folders(paths: list, ignore: list) -> list:
     print(ignore)
     for path in paths:
         for name in os.listdir(path):
+            print(f"{path} : {name}")
             if os.path.isdir(f"{path}{name}") and name not in ignore:
                 result = DatedFolder(name, path, data_logger)
+                print(str(result))
                 if result.isValid:
                     results.append(result)
+    print(f"list_folders result: {results}")
     return results
 
 
