@@ -102,20 +102,15 @@ def list_folders(paths: list, ignore: list) -> list:
 
 def sort_file(source_path: str, file: str, date: datetime, storage_paths: list):
     if date is not None:
-        print(f"Sorting '{file}' - {storage_paths}")
         for folder in storage_paths:
-            print(f"{file} : {date}")
-            print(f"{str(folder)}")
             if folder.begin <= date <= folder.end:
                 if not os.path.isfile(os.path.join(source_path, file)):
                     # copied_path = shutil.copy(os.path.join(source_path, file), folder.get_path())
                     # logger.debug(f"Moving '{file}' to '{copied_path}'")
                     logger.debug(f"Moving '{file}' to '{folder.name}'")
-                    print(f"Moving '{file}' to '{folder.name}'")
                     return
                 else:
                     logger.debug(f"File '{file}' is already sorted in '{folder.name}', nothing to do")
-                    print(f"File '{file}' is already sorted in '{folder.name}', nothing to do")
                     return
     else:
         logger.error(f"No date found for '{file}', can't sort it")
@@ -147,7 +142,6 @@ def main():
 
     # Load config from conf file
     logger.info(f"Execution start at {datetime.now()}")
-    logger.debug("PRINT THIS MOFO")
     data_keys = [item.strip() for item in config["conf"]["data_keys"].split('#')[0].split(',')]
     source_path = config["conf"]["source_path"].split('#')[0].strip()
     if not source_path.endswith('/'):
@@ -167,6 +161,7 @@ def main():
 
     # Read folders and sort files
     dir_list = list_folders(storage_paths, storage_ignore)
+    print(dir_list)
     for name in os.listdir(source_path):
         if os.path.isfile(f"{source_path}{name}") and name not in source_ignore:
             if name.endswith(".mp4"):
