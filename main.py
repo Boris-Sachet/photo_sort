@@ -1,3 +1,4 @@
+import shutil
 import sys
 import configparser
 import logging
@@ -38,19 +39,36 @@ def init(config_path: str, config_file: str):
         configF.close()
 
 
+def get_date_from_name(name: str) -> datetime:
+    for string in name.split('_'):
+        if len(string) == 8:
+            try:
+                result = datetime.strptime(string, "%Y%m%d")
+                return result
+            except ValueError:
+                pass
+                logger.debug(f"{name} : Can't convert '{string}' to datetime")
+    else:
+        logger.error(f"{name} : No date found in filename")
+        return None
+
+
 def get_pic_meta_date(path: str, name: str, data_keys: list) -> datetime:
+    # Can also be done with:
+    # import exifread
+    # f = open(file, 'rb')
+    # tags = exifread.process_file(f)
     try:
         img = Image.open(f"{path}{name}")
         exif = {ExifTags.TAGS[k]: v for k, v in img._getexif().items() if k in ExifTags.TAGS}
         for key in data_keys:
             if key in exif.keys():
                 return datetime.strptime(exif.get(key).split(' ')[0], "%Y:%m:%d")
-        else:
-            return None
-    except FileNotFoundError as e:
-        logger.error(f"{name} metadata reading : {e}")
     except Exception as e:
-        logger.error(f"{name} metadata reading : {e}")
+        file_date = get_date_from_name(name)
+        if file_date is None:
+            logger.error(f"{name} metadata reading : {e}")
+    return None
 
 
 def get_vid_meta_date(path: str, name: str, data_keys: list) -> datetime:
@@ -60,12 +78,15 @@ def get_vid_meta_date(path: str, name: str, data_keys: list) -> datetime:
         for key in data_keys:
             if key in vid[0]['tags']:
                 return datetime.strptime(vid[0]['tags'].get(key).split('T')[0], "%Y-%m-%d")
-        else:
-            return None
     except ffmpeg.Error as e:
-        logger.error(f"{name} metadata reading : {e.stderr}")
-    except FileNotFoundError as e:
-        logger.error(f"{name} metadata reading : {e}")
+        file_date = get_date_from_name(name)
+        if file_date is None:
+            logger.error(f"{name} metadata reading : {e.stderr}")
+    except Exception as e:
+        file_date = get_date_from_name(name)
+        if file_date is None:
+            logger.error(f"{name} metadata reading : {e}")
+    return None
 
 
 def list_folders(paths: list, ignore: list) -> list:
@@ -81,13 +102,17 @@ def list_folders(paths: list, ignore: list) -> list:
 
 def sort_file(source_path: str, file: str, date: datetime, storage_paths: list):
     if date is not None:
-        for path in storage_paths:
-            if path.begin <= date <= path.end:
+        for folder in storage_paths:
+            if folder.begin <= date <= folder.end:
                 if not os.path.isfile(f"{source_path}"):
-                    logger.debug(f"Moving '{file}' to '{path.name}'")
+                    # copied_path = shutil.copy(os.path.join(source_path, file), folder.get_path())
+                    # logger.debug(f"Moving '{file}' to '{copied_path}'")
+                    logger.debug(f"Moving '{file}' to '{folder.name}'")
                     return
                 else:
                     return
+    else:
+        logger.error(f"No date found for '{file}', can't sort it")
 
 
 def log_level(level: str) -> int:

@@ -15,7 +15,7 @@ ffmpeg_bin = "/usr/bin/ffmpeg"
 # os.environ["PATH"] += os.pathsep + ffprobe_install
 # os.environ["PATH"] += os.pathsep + ffmpeg_bin
 
-print(os.environ["PATH"])
+# print(os.environ["PATH"])
 
 name = "VID_20200130_185053.mp4"
 # name = "VID_20191207_234942.mp4"
