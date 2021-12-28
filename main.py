@@ -110,6 +110,7 @@ def sort_file(source_path: str, file: str, date: datetime, storage_paths: list):
                     logger.debug(f"Moving '{file}' to '{folder.name}'")
                     return
                 else:
+                    logger.debug(f"File '{file}' is already sorted in '{folder.name}', nothing to do")
                     return
     else:
         logger.error(f"No date found for '{file}', can't sort it")
