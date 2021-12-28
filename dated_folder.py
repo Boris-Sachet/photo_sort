@@ -29,11 +29,12 @@ class DatedFolder:
         try:
             # One day folder
             if len(date) == 10:
-                self.begin = date_time.strptime(date, "%Y-%m-%d")
-                self.end = self.begin
+                self.isValid = False
+                # self.begin = date_time.strptime(date, "%Y-%m-%d")
+                # self.end = self.begin
 
             # One month folder
-            elif len(date) == 7:
+            if len(date) == 7:
                 self.begin = date_time.strptime(date, "%Y-%m")
                 self.end = last_day_of_month(self.begin)
 
