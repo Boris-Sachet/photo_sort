@@ -135,7 +135,7 @@ def main():
     config.read(os.path.join(config_path, config_file))
 
     # Configure logs
-
+    print(config["conf"])
     log_lv = log_level(config["conf"]["log_level"].split('#')[0].strip())
     logger.setLevel(log_lv)
     data_logger.setLevel(log_lv)
@@ -157,9 +157,11 @@ def main():
             if name.endswith(".mp4"):
                 # print(f"{name} : {get_vid_meta_date(source_path, name, data_keys)}")
                 sort_file(source_path, name, get_vid_meta_date(source_path, name, data_keys), dir_list)
+                # sort_file(source_path, name, get_date_from_name(name), dir_list)
             elif name.endswith(".jpg"):
                 # print(f"{name} : {get_pic_meta_date(source_path, name, data_keys)}")
                 sort_file(source_path, name, get_pic_meta_date(source_path, name, data_keys), dir_list)
+                # sort_file(source_path, name, get_date_from_name(name), dir_list)
             else:
                 logger.error(f"Unsortable file '{name}'")
     logger.info(f"Execution end at {datetime.now()}")
@@ -174,3 +176,7 @@ if __name__ == '__main__':
     logger = logging.getLogger(__name__)
     data_logger = logging.getLogger("datafold")
     main()
+
+# TODO Test new method to get file date
+# TODO Fix nas not reading conf file (maybe?)
+# TODO Fix script moving files if they are already on the folder
