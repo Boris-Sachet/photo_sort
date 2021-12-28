@@ -29,9 +29,8 @@ class DatedFolder:
         try:
             # One day folder
             if len(date) == 10:
-                self.isValid = False
-                # self.begin = date_time.strptime(date, "%Y-%m-%d")
-                # self.end = self.begin
+                self.begin = date_time.strptime(date, "%Y-%m-%d")
+                self.end = self.begin
 
             # One month folder
             if len(date) == 7:
@@ -40,8 +39,9 @@ class DatedFolder:
 
             # One year folder
             elif len(date) == 4:
-                self.begin = date_time.strptime(date, "%Y")
-                self.end = self.begin.replace(month=12, day=31)
+                self.isValid = False
+                # self.begin = date_time.strptime(date, "%Y")
+                # self.end = self.begin.replace(month=12, day=31)
 
             # Interval folder
             elif ".." in date:
