@@ -141,6 +141,7 @@ def main():
 
     # Load config from conf file
     logger.info(f"Execution start at {datetime.now()}")
+    logger.debug("PRINT THIS MOFO")
     data_keys = [item.strip() for item in config["conf"]["data_keys"].split('#')[0].split(',')]
     source_path = config["conf"]["source_path"].split('#')[0].strip()
     if not source_path.endswith('/'):
