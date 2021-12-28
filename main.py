@@ -90,7 +90,16 @@ def get_vid_meta_date(path: str, name: str, data_keys: list) -> datetime:
 
 
 def list_folders(paths: list, ignore: list) -> list:
+    """
+    List all storage folders in given paths and create a list of dated_folder objects with every valid data folder found
+    Data folder is valid only if it start with a date that this scrip can read
+    :param paths: List of paths in which to look for storage folder
+    :param ignore: list of folder names to ignore
+    :return: List of dated_folder object containing the info of every valid folder found
+    """
     results = []
+    print(paths)
+    print(ignore)
     for path in paths:
         for name in os.listdir(path):
             if os.path.isdir(f"{path}{name}") and name not in ignore:
@@ -161,19 +170,21 @@ def main():
 
     # Read folders and sort files
     dir_list = list_folders(storage_paths, storage_ignore)
-    print(dir_list)
-    for name in os.listdir(source_path):
-        if os.path.isfile(f"{source_path}{name}") and name not in source_ignore:
-            if name.endswith(".mp4"):
-                # print(f"{name} : {get_vid_meta_date(source_path, name, data_keys)}")
-                sort_file(source_path, name, get_vid_meta_date(source_path, name, data_keys), dir_list)
-                # sort_file(source_path, name, get_date_from_name(name), dir_list)
-            elif name.endswith(".jpg"):
-                # print(f"{name} : {get_pic_meta_date(source_path, name, data_keys)}")
-                sort_file(source_path, name, get_pic_meta_date(source_path, name, data_keys), dir_list)
-                # sort_file(source_path, name, get_date_from_name(name), dir_list)
-            else:
-                logger.error(f"Unsortable file '{name}'")
+    if len(dir_list) > 0:
+        for name in os.listdir(source_path):
+            if os.path.isfile(f"{source_path}{name}") and name not in source_ignore:
+                if name.endswith(".mp4"):
+                    # print(f"{name} : {get_vid_meta_date(source_path, name, data_keys)}")
+                    sort_file(source_path, name, get_vid_meta_date(source_path, name, data_keys), dir_list)
+                    # sort_file(source_path, name, get_date_from_name(name), dir_list)
+                elif name.endswith(".jpg"):
+                    # print(f"{name} : {get_pic_meta_date(source_path, name, data_keys)}")
+                    sort_file(source_path, name, get_pic_meta_date(source_path, name, data_keys), dir_list)
+                    # sort_file(source_path, name, get_date_from_name(name), dir_list)
+                else:
+                    logger.error(f"Unsortable file '{name}'")
+    else:
+        logger.error("No storage directories found")
     logger.info(f"Execution end at {datetime.now()}")
 
 
