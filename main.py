@@ -101,6 +101,7 @@ def list_folders(paths: list, ignore: list) -> list:
 
 
 def sort_file(source_path: str, file: str, date: datetime, storage_paths: list):
+    logger.debug(f"Sorting '{file}'")
     if date is not None:
         for folder in storage_paths:
             if folder.begin <= date <= folder.end:
@@ -165,10 +166,12 @@ def main():
     for name in os.listdir(source_path):
         if os.path.isfile(f"{source_path}{name}") and name not in source_ignore:
             if name.endswith(".mp4"):
+                logger.debug(f"Sorting video '{name}'")
                 # print(f"{name} : {get_vid_meta_date(source_path, name, data_keys)}")
                 sort_file(source_path, name, get_vid_meta_date(source_path, name, data_keys), dir_list)
                 # sort_file(source_path, name, get_date_from_name(name), dir_list)
             elif name.endswith(".jpg"):
+                logger.debug(f"Sorting picture '{name}'")
                 # print(f"{name} : {get_pic_meta_date(source_path, name, data_keys)}")
                 sort_file(source_path, name, get_pic_meta_date(source_path, name, data_keys), dir_list)
                 # sort_file(source_path, name, get_date_from_name(name), dir_list)
