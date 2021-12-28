@@ -30,7 +30,8 @@ def init(config_path: str, config_file: str):
             "storage_paths": "/volume1/photo/photo, /volume1/photo/photo/Mélo # Comma separated list of path to look for storage folders",
             "storage_ignore": " # Comma separated list of path to ignore",
             "log_level": "info # Choose between debug, info, warning, error, critical",
-            "data_keys": "DateTimeOriginal, DateTime, creation_time # Comma separated list of metadata param to look for retrieving the date of the file"
+            "data_keys": "DateTimeOriginal, DateTime, creation_time # Comma separated list of metadata param to look for retrieving the date of the file",
+            "test_mode": "False # True / False, False to actually move the files to the storage, True to just preted to do it and still write the log (to make sure everything is ok before copiying files everywhere)"
         }
         configF = open(os.path.join(config_path, config_file), "a")
         configF.write("[conf]\n")
@@ -114,14 +115,16 @@ def list_folders(paths: list, ignore: list) -> list:
     return results
 
 
-def sort_file(source_path: str, file: str, date: datetime, storage_paths: list):
+def sort_file(source_path: str, file: str, date: datetime, storage_paths: list, test_mode: bool):
     if date is not None:
         for folder in storage_paths:
             if folder.begin <= date <= folder.end:
                 if not os.path.isfile(os.path.join(folder.get_path(), file)):
-                    # copied_path = shutil.copy(os.path.join(source_path, file), folder.get_path())
-                    # logger.info(f"Moving '{file}' to '{copied_path}'")
-                    logger.info(f"Copied '{file}' to '{folder.name}'")
+                    if not test_mode:
+                        copied_path = shutil.copy(os.path.join(source_path, file), folder.get_path())
+                        logger.info(f"Copied '{file}' to '{copied_path}'")
+                    else:
+                        logger.info(f"Copied '{file}' to '{folder.name}' (test mode)")
                     return
                 else:
                     logger.debug(f"File '{file}' is already sorted in '{folder.name}', nothing to do")
@@ -161,6 +164,7 @@ def main():
     source_ignore = [item.strip() for item in config["conf"]["source_ignore"].split('#')[0].split(',')]
     storage_paths = [item.strip() for item in config["conf"]["storage_paths"].split('#')[0].split(',')]
     storage_ignore = [item.strip() for item in config["conf"]["storage_ignore"].split('#')[0].split(',')]
+    test_mode = False if config["conf"]["source_path"].split('#')[0].strip().lower() == "false" else True
 
     # Fix paths in case user and dev are dumbasses
     if not source_path.endswith('/'):
@@ -169,27 +173,15 @@ def main():
         if not path.endswith('/'):
             storage_paths[storage_paths.index(path)] += '/'
 
-    # print(config["conf"]["log_level"].split('#')[0].strip())
-    # print(logger.level)
-    # print(log_lv)
-    # print(data_keys)
-    # print(source_path)
-    # print(source_ignore)
-    # print(storage_paths)
-    # print(storage_ignore)
-
     # Read folders and sort files
     dir_list = list_folders(storage_paths, storage_ignore)
-    for dir in dir_list:
-        print(str(dir))
-
     if len(dir_list) > 0:
         for name in os.listdir(source_path):
             if os.path.isfile(f"{source_path}{name}") and name not in source_ignore:
                 if name.endswith(".mp4"):
-                    sort_file(source_path, name, get_vid_meta_date(source_path, name, data_keys), dir_list)
+                    sort_file(source_path, name, get_vid_meta_date(source_path, name, data_keys, test_mode), dir_list)
                 elif name.endswith(".jpg"):
-                    sort_file(source_path, name, get_pic_meta_date(source_path, name, data_keys), dir_list)
+                    sort_file(source_path, name, get_pic_meta_date(source_path, name, data_keys, test_mode), dir_list)
                 else:
                     logger.error(f"Unsortable file '{name}'")
     else:
@@ -208,5 +200,3 @@ if __name__ == '__main__':
     logger.addHandler(log_handler)
     data_logger.addHandler(log_handler)
     main()
-
-# TODO Test new method to get file date
