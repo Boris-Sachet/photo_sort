@@ -149,7 +149,7 @@ def main():
     storage_paths = [item.strip() for item in config["conf"]["storage_paths"].split('#')[0].split(',')]
     storage_ignore = [item.strip() for item in config["conf"]["storage_ignore"].split('#')[0].split(',')]
 
-    print(log_level(config["conf"]["log_level"].split('#')[0].strip()))
+    print(config["conf"]["log_level"].split('#')[0].strip())
     print(log_lv)
     print(data_keys)
     print(source_path)
