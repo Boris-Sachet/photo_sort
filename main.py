@@ -49,6 +49,7 @@ def get_date_from_name(name: str) -> datetime:
                 pass
                 logger.debug(f"{name} : Can't convert '{string}' to datetime")
     else:
+        print(f"No date found in : {name.split('_')}")
         logger.error(f"{name} : No date found in filename")
         return None
 
@@ -205,5 +206,3 @@ if __name__ == '__main__':
     main()
 
 # TODO Test new method to get file date
-# TODO Fix nas not printing debug log
-# TODO Fix script moving files if they are already on the folder
