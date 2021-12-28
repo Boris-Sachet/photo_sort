@@ -98,17 +98,13 @@ def list_folders(paths: list, ignore: list) -> list:
     :return: List of dated_folder object containing the info of every valid folder found
     """
     results = []
-    print(paths)
-    print(ignore)
     for path in paths:
         for name in os.listdir(path):
-            print(f"{path} : {name}")
             if os.path.isdir(os.path.join(path, name)) and name not in ignore:
                 result = DatedFolder(name, path, data_logger)
-                print(str(result))
                 if result.isValid:
                     results.append(result)
-    print(f"list_folders result: {results}")
+    logger.info(f"{len(results)} storage folder found")
     return results
 
 
@@ -118,8 +114,8 @@ def sort_file(source_path: str, file: str, date: datetime, storage_paths: list):
             if folder.begin <= date <= folder.end:
                 if not os.path.isfile(os.path.join(source_path, file)):
                     # copied_path = shutil.copy(os.path.join(source_path, file), folder.get_path())
-                    # logger.debug(f"Moving '{file}' to '{copied_path}'")
-                    logger.debug(f"Moving '{file}' to '{folder.name}'")
+                    # logger.info(f"Moving '{file}' to '{copied_path}'")
+                    logger.info(f"Moving '{file}' to '{folder.name}'")
                     return
                 else:
                     logger.debug(f"File '{file}' is already sorted in '{folder.name}', nothing to do")
