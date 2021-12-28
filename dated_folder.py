@@ -83,7 +83,7 @@ class DatedFolder:
                     self.isValid = False
 
             else:
-                self.logger.error(f"Folder name '{self.name}' is invalid {date}")
+                self.logger.error(f"Folder name '{self.name}' is invalid '{date}'")
                 self.isValid = False
         except ValueError as e:
             self.logger.error(f"Folder name '{self.name}' is invalid : {e}")
