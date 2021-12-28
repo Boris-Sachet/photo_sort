@@ -33,7 +33,7 @@ class DatedFolder:
                 self.end = self.begin
 
             # One month folder
-            if len(date) == 7:
+            elif len(date) == 7:
                 self.begin = date_time.strptime(date, "%Y-%m")
                 self.end = last_day_of_month(self.begin)
 
