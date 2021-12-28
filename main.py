@@ -72,6 +72,8 @@ def get_pic_meta_date(path: str, name: str, data_keys: list) -> datetime:
         file_date = get_date_from_name(name)
         if file_date is None:
             logger.error(f"{name} metadata reading : {e}")
+        else:
+            return file_date
     return None
 
 
@@ -86,10 +88,14 @@ def get_vid_meta_date(path: str, name: str, data_keys: list) -> datetime:
         file_date = get_date_from_name(name)
         if file_date is None:
             logger.error(f"{name} metadata reading : {e.stderr}")
+        else:
+            return file_date
     except Exception as e:
         file_date = get_date_from_name(name)
         if file_date is None:
             logger.error(f"{name} metadata reading : {e}")
+        else:
+            return file_date
     return None
 
 
