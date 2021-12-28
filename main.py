@@ -40,19 +40,15 @@ def init(config_path: str, config_file: str):
 
 
 def get_date_from_name(name: str) -> datetime:
-    this_try = datetime.now()
-    print(f"{this_try} Getting date from : {name.split('_')}")
     for string in name.split('_'):
         if len(string) == 8:
             try:
                 result = datetime.strptime(string, "%Y%m%d")
-                print(f"{this_try} File {name} date is : {result}")
                 return result
             except ValueError:
                 pass
                 logger.debug(f"{name} : Can't convert '{string}' to datetime")
     else:
-        print(f"{this_try} No date found in : {name.split('_')}")
         logger.error(f"{name} : No date found in filename")
         return None
 
@@ -122,10 +118,10 @@ def sort_file(source_path: str, file: str, date: datetime, storage_paths: list):
     if date is not None:
         for folder in storage_paths:
             if folder.begin <= date <= folder.end:
-                if not os.path.isfile(os.path.join(source_path, file)):
+                if not os.path.isfile(os.path.join(folder.get_path(), file)):
                     # copied_path = shutil.copy(os.path.join(source_path, file), folder.get_path())
                     # logger.info(f"Moving '{file}' to '{copied_path}'")
-                    logger.info(f"Moving '{file}' to '{folder.name}'")
+                    logger.info(f"Copied '{file}' to '{folder.name}'")
                     return
                 else:
                     logger.debug(f"File '{file}' is already sorted in '{folder.name}', nothing to do")
