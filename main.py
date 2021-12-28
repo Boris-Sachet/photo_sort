@@ -105,7 +105,7 @@ def sort_file(source_path: str, file: str, date: datetime, storage_paths: list):
     if date is not None:
         for folder in storage_paths:
             if folder.begin <= date <= folder.end:
-                if not os.path.isfile(f"{source_path}"):
+                if not os.path.isfile(os.path.join(source_path, file)):
                     # copied_path = shutil.copy(os.path.join(source_path, file), folder.get_path())
                     # logger.debug(f"Moving '{file}' to '{copied_path}'")
                     logger.debug(f"Moving '{file}' to '{folder.name}'")
@@ -152,26 +152,24 @@ def main():
     storage_paths = [item.strip() for item in config["conf"]["storage_paths"].split('#')[0].split(',')]
     storage_ignore = [item.strip() for item in config["conf"]["storage_ignore"].split('#')[0].split(',')]
 
-    print(config["conf"]["log_level"].split('#')[0].strip())
-    print(logger.level)
-    print(log_lv)
-    print(data_keys)
-    print(source_path)
-    print(source_ignore)
-    print(storage_paths)
-    print(storage_ignore)
+    # print(config["conf"]["log_level"].split('#')[0].strip())
+    # print(logger.level)
+    # print(log_lv)
+    # print(data_keys)
+    # print(source_path)
+    # print(source_ignore)
+    # print(storage_paths)
+    # print(storage_ignore)
 
     # Read folders and sort files
     dir_list = list_folders(storage_paths, storage_ignore)
     for name in os.listdir(source_path):
         if os.path.isfile(f"{source_path}{name}") and name not in source_ignore:
             if name.endswith(".mp4"):
-                logger.debug(f"Sorting video '{name}'")
                 # print(f"{name} : {get_vid_meta_date(source_path, name, data_keys)}")
                 sort_file(source_path, name, get_vid_meta_date(source_path, name, data_keys), dir_list)
                 # sort_file(source_path, name, get_date_from_name(name), dir_list)
             elif name.endswith(".jpg"):
-                logger.debug(f"Sorting picture '{name}'")
                 # print(f"{name} : {get_pic_meta_date(source_path, name, data_keys)}")
                 sort_file(source_path, name, get_pic_meta_date(source_path, name, data_keys), dir_list)
                 # sort_file(source_path, name, get_date_from_name(name), dir_list)
