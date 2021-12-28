@@ -179,12 +179,14 @@ def main():
 if __name__ == '__main__':
     sys.path.append("/var/packages/MediaServer/target/bin/ffmpeg")
     sys.path.append("/var/packages/MediaServer/target/bin/ffprobe")
-    logging.basicConfig(filename="log")
     log_handler = RotatingFileHandler("log", maxBytes=5 * 1024 * 1024)
+    log_handler.setFormatter(logging.Formatter('%(levelname)-7s %(asctime)s %(name)s: %(message)s'))
     logger = logging.getLogger(__name__)
     data_logger = logging.getLogger("datafold")
+    logger.addHandler(log_handler)
+    data_logger.addHandler(log_handler)
     main()
 
 # TODO Test new method to get file date
-# TODO Fix nas not reading conf file (maybe?)
+# TODO Fix nas not printing debug log
 # TODO Fix script moving files if they are already on the folder
