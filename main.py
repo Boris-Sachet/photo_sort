@@ -164,7 +164,7 @@ def main():
     source_ignore = [item.strip() for item in config["conf"]["source_ignore"].split('#')[0].split(',')]
     storage_paths = [item.strip() for item in config["conf"]["storage_paths"].split('#')[0].split(',')]
     storage_ignore = [item.strip() for item in config["conf"]["storage_ignore"].split('#')[0].split(',')]
-    test_mode = False if config["conf"]["source_path"].split('#')[0].strip().lower() == "false" else True
+    test_mode = False if config["conf"]["test_mode"].split('#')[0].strip().lower() == "false" else True
 
     # Fix paths in case user and dev are dumbasses
     if not source_path.endswith('/'):
