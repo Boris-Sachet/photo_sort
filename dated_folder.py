@@ -39,9 +39,9 @@ class DatedFolder:
 
             # One year folder
             elif len(date) == 4:
-                # self.isValid = False
-                self.begin = date_time.strptime(date, "%Y")
-                self.end = self.begin.replace(month=12, day=31)
+                self.isValid = False
+                # self.begin = date_time.strptime(date, "%Y")
+                # self.end = self.begin.replace(month=12, day=31)
 
             # Interval folder
             elif ".." in date:
@@ -83,12 +83,11 @@ class DatedFolder:
                     self.isValid = False
 
             else:
-                self.logger.error(f"Folder name '{self.name}' is invalid")
+                self.logger.error(f"Folder name '{self.name}' is invalid {date}")
                 self.isValid = False
         except ValueError as e:
             self.logger.error(f"Folder name '{self.name}' is invalid : {e}")
             self.isValid = False
-
 
     def __str__(self):
         return f"{self.name} - {self.begin} - {self.end}"
