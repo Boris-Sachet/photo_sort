@@ -135,7 +135,6 @@ def main():
     config.read(os.path.join(config_path, config_file))
 
     # Configure logs
-    print(config["conf"])
     log_lv = log_level(config["conf"]["log_level"].split('#')[0].strip())
     logger.setLevel(log_lv)
     data_logger.setLevel(log_lv)
@@ -149,6 +148,14 @@ def main():
     source_ignore = [item.strip() for item in config["conf"]["source_ignore"].split('#')[0].split(',')]
     storage_paths = [item.strip() for item in config["conf"]["storage_paths"].split('#')[0].split(',')]
     storage_ignore = [item.strip() for item in config["conf"]["storage_ignore"].split('#')[0].split(',')]
+
+    print(log_level(config["conf"]["log_level"].split('#')[0].strip()))
+    print(log_lv)
+    print(data_keys)
+    print(source_path)
+    print(source_ignore)
+    print(storage_paths)
+    print(storage_ignore)
 
     # Read folders and sort files
     dir_list = list_folders(storage_paths, storage_ignore)
