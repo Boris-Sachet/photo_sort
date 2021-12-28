@@ -156,11 +156,16 @@ def main():
     logger.info(f"Execution start at {datetime.now()}")
     data_keys = [item.strip() for item in config["conf"]["data_keys"].split('#')[0].split(',')]
     source_path = config["conf"]["source_path"].split('#')[0].strip()
-    if not source_path.endswith('/'):
-        source_path += '/'
     source_ignore = [item.strip() for item in config["conf"]["source_ignore"].split('#')[0].split(',')]
     storage_paths = [item.strip() for item in config["conf"]["storage_paths"].split('#')[0].split(',')]
     storage_ignore = [item.strip() for item in config["conf"]["storage_ignore"].split('#')[0].split(',')]
+
+    # Fix paths in case user and dev are dumbasses
+    if not source_path.endswith('/'):
+        source_path += '/'
+    for path in storage_paths:
+        if not path.endswith('/'):
+            storage_paths[storage_paths.index(path)] += '/'
 
     # print(config["conf"]["log_level"].split('#')[0].strip())
     # print(logger.level)
