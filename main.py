@@ -104,6 +104,8 @@ def sort_file(source_path: str, file: str, date: datetime, storage_paths: list):
     logger.debug(f"Sorting '{file}'")
     if date is not None:
         for folder in storage_paths:
+            print(f"{file} : {date}")
+            print(f"{str(folder)}")
             if folder.begin <= date <= folder.end:
                 if not os.path.isfile(os.path.join(source_path, file)):
                     # copied_path = shutil.copy(os.path.join(source_path, file), folder.get_path())
