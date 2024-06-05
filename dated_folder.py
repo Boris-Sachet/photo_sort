@@ -1,6 +1,10 @@
 import datetime
+import logging
 import os.path
 from datetime import datetime as date_time
+
+
+LOGGER = logging.getLogger(__name__)
 
 
 def last_day_of_month(any_day):
@@ -14,15 +18,13 @@ def last_day_of_month(any_day):
 
 class DatedFolder:
 
-    def __init__(self, name: str, path: str, logger):
-        self.logger = logger
+    def __init__(self, name: str, path: str):
         self.name = name
         self.path = path if path.endswith('/') else path + '/'
         self.begin = date_time.now()
-        self.end = self.begin
+        self.end = self.begin.replace(hour=23, minute=59, second=59)
         self.isValid = True
         self.extract_dates()
-        self.end = self.end.replace(hour=23, minute=59, second=59)
 
     def extract_dates(self):
         date = self.name.split(" ")[0]
@@ -69,7 +71,7 @@ class DatedFolder:
                     self.end = date_time.strptime(dates[1], "%Y-%m-%d")
 
                 else:
-                    self.logger.error(f"Folder name '{self.name}' is invalid")
+                    LOGGER.error(f"Folder name '{self.name}' is invalid")
                     self.isValid = False
 
             # Multiple days of the same month folder
@@ -79,14 +81,14 @@ class DatedFolder:
                     self.begin = date_time.strptime(dates[0], "%Y-%m-%d")
                     self.end = self.begin.replace(day=int(dates[len(dates) - 1]))
                 else:
-                    self.logger.error(f"Folder name '{self.name}' is invalid")
+                    LOGGER.error(f"Folder name '{self.name}' is invalid")
                     self.isValid = False
 
             else:
-                self.logger.error(f"Folder name '{self.name}' is invalid '{date}'")
+                LOGGER.error(f"Folder name '{self.name}' is invalid '{date}'")
                 self.isValid = False
         except ValueError as e:
-            self.logger.error(f"Folder name '{self.name}' is invalid : {e}")
+            LOGGER.error(f"Folder name '{self.name}' is invalid : {e}")
             self.isValid = False
 
     def __str__(self):
