@@ -10,12 +10,12 @@ logger_config = {
             "class": "logging.StreamHandler",
             "formatter": "default",
         },
-        "file": {
-            "class": "logging.RotatingFileHandler",
-            "formater": "default",
-            "filename": "photo_sort.log",
-            "maxBtytes": 5 * 1024 * 1024,
-        }
+        # "file": {
+        #     "class": "logging.RotatingFileHandler",
+        #     "formater": "default",
+        #     "filename": "photo_sort.log",
+        #     "maxBtytes": 5 * 1024 * 1024,
+        # }
     },
     "loggers": {"": {"handlers": ["default"], "level": os.getenv("LOGLEVEL", "INFO").upper()}},
 }

@@ -1,8 +1,10 @@
 import datetime
 import logging
+import os
 import os.path
 from datetime import datetime as date_time
-
+from pathlib import Path
+from typing import List
 
 LOGGER = logging.getLogger(__name__)
 
@@ -18,9 +20,9 @@ def last_day_of_month(any_day):
 
 class DatedFolder:
 
-    def __init__(self, name: str, path: str):
+    def __init__(self, name: str, path: Path):
         self.name = name
-        self.path = path if path.endswith('/') else path + '/'
+        self.path = path / name
         self.begin = date_time.now()
         self.end = self.begin.replace(hour=23, minute=59, second=59)
         self.isValid = True
@@ -94,5 +96,21 @@ class DatedFolder:
     def __str__(self):
         return f"{self.name} - {self.begin} - {self.end}"
 
-    def get_path(self) -> str:
-        return os.path.join(self.path, self.name)
+    @staticmethod
+    def list_folders(paths: List[Path], ignore: List[Path]) -> list:
+        """
+        List all storage folders in given paths and create a list of dated_folder objects with every valid data folder found
+        Data folder is valid only if it starts with a date that this scrip can read
+        :param paths: List of paths in which to look for storage folder
+        :param ignore: list of folder names to ignore
+        :return: List of dated_folder object containing the info of every valid folder found
+        """
+        results = []
+        for path in paths:
+            for name in os.listdir(path):
+                if (path/name).is_dir() and name not in ignore:
+                    result = DatedFolder(name, path)
+                    if result.isValid:
+                        results.append(result)
+        LOGGER.info(f"{len(results)} storage folder found")
+        return results

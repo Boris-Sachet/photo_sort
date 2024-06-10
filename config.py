@@ -1,35 +1,36 @@
 import configparser
 import logging
 import os
+from pathlib import Path
 
 LOGGER = logging.getLogger(__name__)
 
 
 class Config:
     def __init__(self):
-        config_path = f"{os.path.expanduser('~')}/.config/photosort/"
-        config_file = "config"
-        self.init(config_path, config_file)
+        config_path = Path(f"{os.path.expanduser('~')}/.config/photosort/")
+        config_file_name = "config"
+        self.init(config_path, config_file_name)
 
         # Read config
         config_file = configparser.ConfigParser()
-        config_file.read(os.path.join(config_path, config_file))
+        config_file.read(config_path/config_file_name)
 
         # Configure logs
         self.log_lv = config_file["conf"]["log_level"].split('#')[0].strip()
 
         # Load config from conf file
         self.data_keys = [item.strip() for item in config_file["conf"]["data_keys"].split('#')[0].split(',')]
-        self.source_path = config_file["conf"]["source_path"].split('#')[0].strip()
-        self.source_ignore = [item.strip() for item in config_file["conf"]["source_ignore"].split('#')[0].split(',')]
-        self.storage_paths = [item.strip() for item in config_file["conf"]["storage_paths"].split('#')[0].split(',')]
-        self.storage_ignore = [item.strip() for item in config_file["conf"]["storage_ignore"].split('#')[0].split(',')]
+        self.source_path = Path(config_file["conf"]["source_path"].split('#')[0].strip())
+        self.source_ignore = [Path(item.strip()) for item in config_file["conf"]["source_ignore"].split('#')[0].split(',')]
+        self.storage_paths = [Path(item.strip()) for item in config_file["conf"]["storage_paths"].split('#')[0].split(',')]
+        self.storage_ignore = [Path(item.strip()) for item in config_file["conf"]["storage_ignore"].split('#')[0].split(',')]
         self.test_mode = False if config_file["conf"]["test_mode"].split('#')[0].strip().lower() == "false" else True
         self.pushbullet_api_key = config_file["conf"]["pushbullet_api_key"].split('#')[0].strip()
         self.pushbullet_encryption_key = config_file["conf"]["pushbullet_encryption_key"].split('#')[0].strip()
 
     @staticmethod
-    def init(config_path: str, config_file: str):
+    def init(config_path: Path, config_file: str):
         """
         This method initialize the application and create the config directory and the config file with default values
         if it does not exist.
@@ -37,7 +38,7 @@ class Config:
         :param config_file: Configuration file name
         """
         os.makedirs(config_path, 0o744, True)
-        if not os.path.isfile(os.path.join(config_path, config_file)):
+        if not (config_path/config_file).is_file():
             logging.info("Creating default configuration file")
             # Insert default config if file does not exist
             config = {
@@ -54,8 +55,7 @@ class Config:
                 "pushbullet_api_key": " # Get it here : https://www.pushbullet.com/#settings/account",
                 "pushbullet_encryption_key": "",
             }
-            configF = open(os.path.join(config_path, config_file), "a")
-            configF.write("[conf]\n")
-            for key, value in config.items():
-                configF.write(f"{key} = {value}\n")
-            configF.close()
+            with (config_path/config_file).open("a") as file:
+                file.write("[conf]\n")
+                for key, value in config.items():
+                    file.write(f"{key} = {value}\n")
