@@ -106,7 +106,7 @@ class DatedFolder:
         return f"{self.name} - {self.begin} - {self.end}"
 
     @staticmethod
-    def list_folders(private_paths: List[Path], public_paths: List[Path], ignore: List[Path]) -> list:
+    def list_folders(private_paths: List[Path], public_paths: List[Path], ignore: List[str]) -> list:
         """
         List all storage folders in given paths and create a list of dated_folder objects with every valid data folder
          found Data folder is valid only if it starts with a date that this scrip can read

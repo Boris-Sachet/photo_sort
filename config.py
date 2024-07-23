@@ -44,7 +44,7 @@ class SourceConfig:
 class Config:
     private_storage_paths: List[Path] = []
     public_storage_paths: List[Path] = []
-    storage_ignore: List[Path] = []
+    storage_ignore: List[str] = []
     use_subdir_for_public_storages: bool = False
     public_storages_subdir_names: List[str] = []
     log_level: str = 'INFO'
@@ -91,7 +91,7 @@ class Config:
         # Storage settings
         cls.private_storage_paths = extract_paths(config_file["storage"]["private_storage_paths"])
         cls.public_storage_paths = extract_paths(config_file["storage"]["public_storage_paths"])
-        cls.storage_ignore = extract_paths(config_file["storage"]["storage_ignore"])
+        cls.storage_ignore = extract_list(config_file["storage"]["storage_ignore"])
         cls.use_subdir_for_public_storages = extract_bool(config_file["storage"]["use_subdir_for_public"])
         cls.public_storages_subdir_names = extract_list(config_file["storage"]["subdir_names"])
 
