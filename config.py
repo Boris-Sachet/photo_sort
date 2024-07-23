@@ -1,61 +1,102 @@
 import configparser
 import logging
 import os
+import shutil
+from os.path import dirname, abspath
 from pathlib import Path
+from typing import List
 
 LOGGER = logging.getLogger(__name__)
 
 
+class SourceConfig:
+    def __init__(self, source_path: str, source_ignore: str, use_subdir: str, subdir_names: str):
+        self.source_path = Path(source_path)
+        self.source_ignore = [item.strip() for item in source_ignore.split(',')]
+        self.use_subdir = use_subdir.strip().lower() in ["true", "yes", "y"]
+        self.subdir_names = [item.strip() for item in subdir_names.split(',')]
+
+
 class Config:
-    def __init__(self):
+    private_storage_paths: List[Path] = []
+    public_storage_paths: List[Path] = []
+    storage_ignore: List[Path] = []
+    use_subdir_for_public_storages: bool = False
+    public_storages_subdir_names: List[str] = []
+    log_level: str = 'INFO'
+    data_keys: List[str] = []
+    test_mode: bool = False
+    pushbullet_api_key: str = ''
+    pushbullet_encryption_key: str = ''
+    sources: List[SourceConfig] = []
+
+    @classmethod
+    def init(cls):
+        """
+        This method initialize the application config and create the config directory and the config file with default
+         values if it does not exist.
+        """
         config_path = Path(f"{os.path.expanduser('~')}/.config/photosort/")
         config_file_name = "config"
-        self.init(config_path, config_file_name)
+        os.makedirs(config_path, 0o744, True)
+        if not (config_path / config_file_name).is_file():
+            cls.create_config_file(config_path, config_file_name)
 
-        # Read config
-        config_file = configparser.ConfigParser()
-        config_file.read(config_path/config_file_name)
-
-        # Configure logs
-        self.log_lv = config_file["conf"]["log_level"].split('#')[0].strip()
-
-        # Load config from conf file
-        self.data_keys = [item.strip() for item in config_file["conf"]["data_keys"].split('#')[0].split(',')]
-        self.source_path = Path(config_file["conf"]["source_path"].split('#')[0].strip())
-        self.source_ignore = [Path(item.strip()) for item in config_file["conf"]["source_ignore"].split('#')[0].split(',')]
-        self.storage_paths = [Path(item.strip()) for item in config_file["conf"]["storage_paths"].split('#')[0].split(',')]
-        self.storage_ignore = [Path(item.strip()) for item in config_file["conf"]["storage_ignore"].split('#')[0].split(',')]
-        self.test_mode = False if config_file["conf"]["test_mode"].split('#')[0].strip().lower() == "false" else True
-        self.pushbullet_api_key = config_file["conf"]["pushbullet_api_key"].split('#')[0].strip()
-        self.pushbullet_encryption_key = config_file["conf"]["pushbullet_encryption_key"].split('#')[0].strip()
+        cls.parse_config_file(config_path, config_file_name)
 
     @staticmethod
-    def init(config_path: Path, config_file: str):
-        """
-        This method initialize the application and create the config directory and the config file with default values
-        if it does not exist.
-        :param config_path: Configuration path
-        :param config_file: Configuration file name
-        """
-        os.makedirs(config_path, 0o744, True)
-        if not (config_path/config_file).is_file():
-            logging.info("Creating default configuration file")
-            # Insert default config if file does not exist
-            config = {
-                "source_path": "/volume1/photo/phone/DCIM/Camera # Files source folder path",
-                "source_ignore": " # Comma separated list of files names to ignore",
-                "source_messenger": "",
-                "source_whatsapp": "",
-                "source_element": "",
-                "storage_paths": "/volume1/photo/photo, /volume1/photo/photo/Mélo # Comma separated list of path to look for storage folders",
-                "storage_ignore": " # Comma separated list of path to ignore",
-                "log_level": "info # Choose between debug, info, warning, error, critical",
-                "data_keys": "DateTimeOriginal, DateTime, creation_time # Comma separated list of metadata param to look for retrieving the date of the file",
-                "test_mode": "False # True / False, False to actually move the files to the storage, True to just preted to do it and still write the log (to make sure everything is ok before copiying files everywhere)",
-                "pushbullet_api_key": " # Get it here : https://www.pushbullet.com/#settings/account",
-                "pushbullet_encryption_key": "",
-            }
-            with (config_path/config_file).open("a") as file:
-                file.write("[conf]\n")
-                for key, value in config.items():
-                    file.write(f"{key} = {value}\n")
+    def create_config_file(config_path: Path, config_file: str):
+        # TODO copy template file instead of this
+        logging.info("Creating default configuration file")
+        # Insert default config if file does not exist
+        shutil.copy(src=Path(dirname(abspath(__file__)), "config_template.ini"), dst=config_path / config_file)
+
+    @classmethod
+    def parse_config_file(cls, config_path: Path, config_file_name: str):
+        # Read config
+        config_file = configparser.ConfigParser()
+        config_file.read(config_path / config_file_name)
+
+        # Load config from conf file
+        # General settings
+        cls.private_storage_paths = cls.__extract_paths(config_file["general"]["private_storage_paths"])
+        cls.public_storage_paths = cls.__extract_paths(config_file["general"]["public_storage_paths"])
+        cls.storage_ignore = cls.__extract_paths(config_file["general"]["storage_ignore"])
+        cls.use_subdir_for_public_storages = cls.__extract_bool(config_file["general"]["use_subdir_for_public"])
+        cls.public_storages_subdir_names = cls.__extract_list(config_file["general"]["subdir_names"])
+        cls.log_level = config_file["general"]["log_level"].strip()
+        cls.data_keys = cls.__extract_list(config_file["general"]["data_keys"])
+        cls.test_mode = cls.__extract_bool(config_file["general"]["test_mode"])
+        cls.pushbullet_api_key = config_file["general"]["pushbullet_api_key"].strip()
+        cls.pushbullet_encryption_key = config_file["general"]["pushbullet_encryption_key"].strip()
+
+        # Source settings
+        cls.sources = [SourceConfig(
+            source_path=config_file["source.photo"]["source_path"],
+            source_ignore=config_file["source.photo"]["source_ignore"],
+            use_subdir=config_file["source.photo"]["use_subdir"],
+            subdir_names=config_file["source.photo"]["subdir_names"],
+        )]
+
+    @staticmethod
+    def __extract_paths(paths: str) -> List[Path]:
+        """Extract paths from a config string"""
+        result = []
+        if paths.strip() != '':
+            for path in paths.split(','):
+                result.append(Path(path.strip()))
+        return result
+
+    @staticmethod
+    def __extract_list(string: str) -> List[str]:
+        """Extract a list of strings from a config string"""
+        result = []
+        if string.strip() != '':
+            for string in string.split(','):
+                result.append(string.strip())
+        return result
+
+    @staticmethod
+    def __extract_bool(boolean: str) -> bool:
+        """Extract a boolean from a config string"""
+        return boolean.strip().lower() in ["true", "yes", "y"]

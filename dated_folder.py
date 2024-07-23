@@ -6,6 +6,8 @@ from datetime import datetime as date_time
 from pathlib import Path
 from typing import List
 
+from config import Config
+
 LOGGER = logging.getLogger(__name__)
 
 
@@ -20,12 +22,13 @@ def last_day_of_month(any_day):
 
 class DatedFolder:
 
-    def __init__(self, name: str, path: Path):
+    def __init__(self, name: str, path: Path, is_public: bool):
         self.name = name
         self.path = path / name
         self.begin = date_time.now()
         self.end = self.begin.replace(hour=23, minute=59, second=59)
         self.isValid = True
+        self.is_public = is_public
         self.extract_dates()
 
     def extract_dates(self):
@@ -93,23 +96,38 @@ class DatedFolder:
             LOGGER.error(f"Folder name '{self.name}' is invalid : {e}")
             self.isValid = False
 
+    def find_user_subfolder(self) -> Path:
+        """Look for a user subfolder in this folder"""
+        for subfolder in os.listdir(self.path):
+            if (self.path / subfolder).is_dir() and subfolder.lower() in Config.public_storages_subdir_names:
+                return self.path / subfolder
+
     def __str__(self):
         return f"{self.name} - {self.begin} - {self.end}"
 
     @staticmethod
-    def list_folders(paths: List[Path], ignore: List[Path]) -> list:
+    def list_folders(private_paths: List[Path], public_paths: List[Path], ignore: List[Path]) -> list:
         """
-        List all storage folders in given paths and create a list of dated_folder objects with every valid data folder found
-        Data folder is valid only if it starts with a date that this scrip can read
-        :param paths: List of paths in which to look for storage folder
+        List all storage folders in given paths and create a list of dated_folder objects with every valid data folder
+         found Data folder is valid only if it starts with a date that this scrip can read
+        :param public_paths: List of public paths in which to look for storage folder
+        :param private_paths: List of private paths in which to look for storage folder
         :param ignore: list of folder names to ignore
         :return: List of dated_folder object containing the info of every valid folder found
         """
         results = []
-        for path in paths:
+        # Private paths listing
+        for path in private_paths:
             for name in os.listdir(path):
-                if (path/name).is_dir() and name not in ignore:
-                    result = DatedFolder(name, path)
+                if (path / name).is_dir() and name not in ignore:
+                    result = DatedFolder(name, path, False)
+                    if result.isValid:
+                        results.append(result)
+        # Public paths listing
+        for path in public_paths:
+            for name in os.listdir(path):
+                if (path / name).is_dir() and name not in ignore:
+                    result = DatedFolder(name, path, True)
                     if result.isValid:
                         results.append(result)
         LOGGER.info(f"{len(results)} storage folder found")
