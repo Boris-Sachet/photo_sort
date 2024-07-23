@@ -31,7 +31,7 @@ def sort_source(source: SourceConfig, dir_list: List[DatedFolder], count: int, s
         if (source.source_path / name).is_file() and name not in source.source_ignore:
             file = File.get_type(filename=name, dir_path=source.source_path)
             if file and file.is_sortable:
-                sort_result = file.sort(storage_paths=dir_list)
+                sort_result = file.sort(storage_paths=dir_list, source=source)
                 if sort_result:
                     sorted_count += 1
                     continue
@@ -62,12 +62,14 @@ def main():
     )
     if len(dir_list) > 0:
         for source in Config.sources:
-            count, sorted_count, unsortable_count = sort_source(source=source,
-                                                                dir_list=dir_list,
-                                                                count=count,
-                                                                sorted_count=sorted_count,
-                                                                unsortable_count=unsortable_count,
-                                                                )
+            if source.source_path is not None:
+                count, sorted_count, unsortable_count = sort_source(source=source,
+                                                                    dir_list=dir_list,
+                                                                    count=count,
+                                                                    sorted_count=sorted_count,
+                                                                    unsortable_count=unsortable_count,
+                                                                    )
+                LOGGER.info(f"Sorted source {source.name}")
     else:
         LOGGER.error("No storage directories found")
 

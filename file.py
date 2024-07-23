@@ -1,4 +1,5 @@
 import logging
+import os
 import shutil
 from datetime import datetime
 from pathlib import Path
@@ -7,7 +8,7 @@ from typing import List
 import ffmpeg
 from PIL import Image, ExifTags
 
-from config import Config
+from config import Config, SourceConfig
 from dated_folder import DatedFolder
 
 LOGGER = logging.getLogger(__name__)
@@ -35,7 +36,7 @@ class File:
         LOGGER.error(f"{self.filename} : No date found in filename")
         return None
 
-    def sort(self, storage_paths: List[DatedFolder]) -> bool:
+    def sort(self, storage_paths: List[DatedFolder], source: SourceConfig) -> bool:
         """Sort the file in the correct folder"""
         # Find the dated folder matching this file date
         folder = self.__find_folder_to_sort_into(storage_paths)
@@ -43,7 +44,7 @@ class File:
             return False
 
         # Find storage path for file in current folder
-        storage_path = self.__find_storage_path(folder)
+        storage_path = self.__find_storage_path(folder, source)
         if storage_path is None:
             LOGGER.debug(f"No correct subfolder for {self.filename} in {folder.name}")
             return False
@@ -68,7 +69,7 @@ class File:
             copied_path = shutil.copy(self.path, dst)
             LOGGER.info(f"Copied '{self.filename}' to '{copied_path}'")
         else:
-            LOGGER.info(f"Copied '{self.filename}' to '{dst.name}' (test mode)")
+            LOGGER.info(f"Copied '{self.filename}' to '{dst}' (test mode)")
 
     def __find_folder_to_sort_into(self, storage_paths: List[DatedFolder]) -> DatedFolder:
         """Find the dated folder with the date interval matching the date of this file"""
@@ -80,11 +81,28 @@ class File:
         else:
             LOGGER.error(f"No date found for '{self.filename}', can't sort it")
 
-    def __find_storage_path(self, folder: DatedFolder) -> Path:
+    @classmethod
+    def __find_storage_path(cls, folder: DatedFolder, source: SourceConfig) -> Path | None:
         """Find the correct storage path for the file in the given folder"""
+        # User folder handling
         if not folder.is_public:
-            return folder.path
-        return folder.find_user_subfolder()
+            user_storage_path = folder.path
+        else:
+            user_storage_path = folder.find_user_subfolder()
+        # Don't bother searching for source subfolder if user folder is required but missing
+        if user_storage_path is None:
+            return user_storage_path
+
+        # Source subfolder handling
+        # Return folder path or folder user path if source doesn't use subdir
+        if not source.use_subdir:
+            return user_storage_path
+        # If source require subdir look for it in folder path or folder user path
+        for subfolder in os.listdir(user_storage_path):
+            if (user_storage_path / subfolder).is_dir() and subfolder.lower() in source.subdir_names:
+                return user_storage_path / subfolder
+        # If no source subdir found return nothing so file has nowhere to go
+        return None
 
     @classmethod
     def get_type(cls, filename: str, dir_path: Path):
