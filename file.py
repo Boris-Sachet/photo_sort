@@ -37,29 +37,48 @@ class File:
 
     def sort(self, storage_paths: List[DatedFolder]) -> bool:
         """Sort the file in the correct folder"""
+        # Find the dated folder matching this file date
+        folder = self.__find_folder_to_sort_into(storage_paths)
+        if folder is None:
+            return False
+
+        # Find storage path for file in current folder
+        storage_path = self.__find_storage_path(folder)
+        if storage_path is None:
+            LOGGER.debug(f"No correct subfolder for {self.filename} in {folder.name}")
+            return False
+
+        # If correct storage path if found, copy the file if it doesn't exist already (unless test mode)
+        if not (storage_path / self.filename).is_file():
+            self.copy(dst=storage_path)
+            return True
+
+        # File is already there, nothing to do
+        LOGGER.debug(f"File '{self.filename}' is already sorted in '{folder.name}', nothing to do")
+        return False
+
+    def copy(self, dst: Path):
+        """
+        Copy the file to destination folder.
+        If test mode is not enabled (else pretend to do it in the logs)
+        :param dst:
+        :return:
+        """
+        if not Config.test_mode:
+            copied_path = shutil.copy(self.path, dst)
+            LOGGER.info(f"Copied '{self.filename}' to '{copied_path}'")
+        else:
+            LOGGER.info(f"Copied '{self.filename}' to '{dst.name}' (test mode)")
+
+    def __find_folder_to_sort_into(self, storage_paths: List[DatedFolder]) -> DatedFolder:
+        """Find the dated folder with the date interval matching the date of this file"""
         if self.date is not None:
             for folder in storage_paths:
                 # Search the folder matching the date of the file (only first one found counts)
                 if folder.begin <= self.date <= folder.end:
-                    # Find storage path for file in current folder
-                    storage_path = self.__find_storage_path(folder)
-                    if storage_path is None:
-                        LOGGER.debug(f"No correct subfolder for {self.filename} in {folder.name}")
-                        return False
-                    # If correct storage path if found, copy the file if it doesn't exist already (unless test mode)
-                    if not (storage_path / self.filename).is_file():
-                        if not Config.test_mode:
-                            copied_path = shutil.copy(self.path, storage_path)
-                            LOGGER.info(f"Copied '{self.filename}' to '{copied_path}'")
-                        else:
-                            LOGGER.info(f"Copied '{self.filename}' to '{folder.name}' (test mode)")
-                        return True
-                    # File is already there, nothing to do
-                    LOGGER.debug(f"File '{self.filename}' is already sorted in '{folder.name}', nothing to do")
-                    return False
+                    return folder
         else:
             LOGGER.error(f"No date found for '{self.filename}', can't sort it")
-            return False
 
     def __find_storage_path(self, folder: DatedFolder) -> Path:
         """Find the correct storage path for the file in the given folder"""
