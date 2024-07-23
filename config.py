@@ -61,7 +61,7 @@ class Config:
          values if it does not exist.
         """
         config_path = Path(f"{os.path.expanduser('~')}/.config/photosort/")
-        config_file_name = "config"
+        config_file_name = "config.ini"
         os.makedirs(config_path, 0o744, True)
         if not (config_path / config_file_name).is_file():
             cls.create_config_file(config_path, config_file_name)
