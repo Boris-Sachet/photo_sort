@@ -1,6 +1,7 @@
 import logging
 import os
 import shutil
+import dateutil.parser as dparser
 from datetime import datetime
 from pathlib import Path
 from typing import List
@@ -26,15 +27,11 @@ class File:
 
     def get_date_from_name(self) -> datetime | None:
         """Attempt to get the file creation date from its name"""
-        for string in self.filename.split('_'):
-            if len(string) == 8:
-                try:
-                    result = datetime.strptime(string, "%Y%m%d")
-                    return result
-                except ValueError:
-                    LOGGER.debug(f"{self.filename} : Can't convert '{string}' to datetime")
-        LOGGER.error(f"{self.filename} : No date found in filename")
-        return None
+        try:
+            return dparser.parse(self.filename, fuzzy=True)
+        except ValueError:
+            LOGGER.error(f"{self.filename} : No date found in filename")
+            return None
 
     def sort(self, storage_paths: List[DatedFolder], source: SourceConfig) -> bool:
         """Sort the file in the correct folder"""
@@ -115,7 +112,7 @@ class File:
         """
         if filename.endswith(".mp4"):
             return Video(filename, dir_path)
-        elif filename.endswith(".jpg"):
+        elif filename.endswith((".jpg", ".jpeg", ".png")):
             return Photo(filename, dir_path)
 
 
@@ -133,17 +130,16 @@ class Photo(File):
         # tags = exifread.process_file(f)
         try:
             img = Image.open(self.path)
-            exif = {ExifTags.TAGS[k]: v for k, v in img._getexif().items() if k in ExifTags.TAGS}
-            for key in self.data_keys:
-                if key in exif.keys():
-                    return datetime.strptime(exif.get(key).split(' ')[0], "%Y:%m:%d")
+            img_exif = img.getexif()
+            if img_exif:
+                exif = {ExifTags.TAGS[k]: v for k, v in img_exif.items() if k in ExifTags.TAGS}
+                for key in self.data_keys:
+                    if key in exif.keys():
+                        return datetime.strptime(exif.get(key).split(' ')[0], "%Y:%m:%d")
         except Exception as error:
-            file_date = self.get_date_from_name()
-            if file_date is None:
-                LOGGER.error(f"{self.filename} metadata reading : {error}")
-            else:
-                return file_date
-        return None
+            LOGGER.error(f"{self.filename} metadata reading : {error}, falling back to searching in filename")
+
+        return self.get_date_from_name()
 
 
 class Video(File):
