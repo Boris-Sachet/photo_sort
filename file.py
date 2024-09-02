@@ -33,6 +33,14 @@ class File:
             LOGGER.error(f"{self.filename} : No date found in filename")
             return None
 
+    def get_creation_date(self) -> datetime | None:
+        """Get the last modification time of the file, can be unreliable to determine when the file was created"""
+        try:
+            m_time = os.path.getctime(self.path)
+            return datetime.fromtimestamp(m_time)
+        except OSError:
+            return None
+
     def sort(self, storage_paths: List[DatedFolder], source: SourceConfig) -> bool:
         """Sort the file in the correct folder"""
         # Find the dated folder matching this file date
@@ -112,7 +120,7 @@ class File:
         """
         if filename.endswith(".mp4"):
             return Video(filename, dir_path)
-        elif filename.endswith((".jpg", ".jpeg", ".png")):
+        elif filename.endswith((".jpg", ".jpeg", ".png", ".webp")):
             return Photo(filename, dir_path)
 
 
