@@ -85,10 +85,11 @@ class File:
     def __find_storage_path(cls, folder: DatedFolder, source: SourceConfig) -> Path | None:
         """Find the correct storage path for the file in the given folder"""
         # User folder handling
-        if not folder.is_public:
-            user_storage_path = folder.path
-        else:
+        if folder.is_public and Config.use_subdir_for_public_storages:
             user_storage_path = folder.find_user_subfolder()
+        else:
+            user_storage_path = folder.path
+
         # Don't bother searching for source subfolder if user folder is required but missing
         if user_storage_path is None:
             return user_storage_path
