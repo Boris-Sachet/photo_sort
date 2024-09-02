@@ -26,10 +26,11 @@ class DatedFolder:
         self.name = name
         self.path = path / name
         self.begin = date_time.now()
-        self.end = self.begin.replace(hour=23, minute=59, second=59)
+        self.end = self.begin
         self.isValid = True
         self.is_public = is_public
         self.extract_dates()
+        self.end = self.end.replace(hour=23, minute=59, second=59)
 
     def extract_dates(self):
         date = self.name.split(" ")[0]
