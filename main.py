@@ -21,11 +21,12 @@ def sort_source(source: SourceConfig, dir_list: List[DatedFolder], count: int, s
     Sort files from a given source
     :param source: Files source configuration of files to sort
     :param dir_list: List of dated folders to sort into
-    :param count: Total count of files treated
-    :param sorted_count: Total count of files sorted
-    :param unsortable_count: Total count of files unsorted
     :return: counters packed in a tuple
     """
+    count = 0
+    sorted_count = 0
+    unsortable_count = 0
+
     for name in os.listdir(source.source_path):
         count += 1
         if (source.source_path / name).is_file() and name not in source.source_ignore:
@@ -52,9 +53,10 @@ def main():
         pushbullet_conn = Pushbullet(Config.pushbullet_api_key, Config.pushbullet_encryption_key)
 
     # Read folders and sort files
-    count = 0
-    sorted_count = 0
-    unsortable_count = 0
+    total_count = 0
+    total_sorted_count = 0
+    total_unsortable_count = 0
+    sources_reports = []
     dir_list = DatedFolder.list_folders(
         private_paths=Config.private_storage_paths,
         public_paths=Config.public_storage_paths,
@@ -63,17 +65,24 @@ def main():
     if len(dir_list) > 0:
         for source in Config.sources:
             if source.source_path is not None:
+                LOGGER.info(f"Sorting source {source.name}")
                 count, sorted_count, unsortable_count = sort_source(source=source,
                                                                     dir_list=dir_list,
-                                                                    count=count,
-                                                                    sorted_count=sorted_count,
-                                                                    unsortable_count=unsortable_count,
+                                                                    count=total_count,
+                                                                    sorted_count=total_sorted_count,
+                                                                    unsortable_count=total_unsortable_count,
                                                                     )
-                LOGGER.info(f"Sorted source {source.name}")
+                total_count += count
+                total_sorted_count += sorted_count
+                total_unsortable_count += unsortable_count
+                source_report = f"{source.name} - {sorted_count}/{count}, unsortables {unsortable_count}"
+                sources_reports.append(source_report)
+                LOGGER.info(f"Sorted source {source_report}")
     else:
         LOGGER.error("No storage directories found")
 
-    execution_report = f"{sorted_count} of {count} files sorted, {unsortable_count} unsortables files"
+    sources_reports.insert(0, f"{total_sorted_count} of {total_count} files sorted, {total_unsortable_count} unsortables files")
+    execution_report = "\n".join(sources_reports)
     if pushbullet_conn:
         pushbullet_conn.push_note(f"{socket.gethostname()} - PhotoSort executed", execution_report)
     LOGGER.info(execution_report)
