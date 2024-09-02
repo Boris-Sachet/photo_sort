@@ -159,7 +159,7 @@ class Video(File):
                 if key in vid[0]['tags']:
                     return datetime.strptime(vid[0]['tags'].get(key).split('T')[0], "%Y-%m-%d")
         except ffmpeg.Error as e:
-            LOGGER.error(f"{self.filename} metadata reading : {e.stderr}")
+            LOGGER.error(f"{self.filename} ffmpeg metadata reading : {e.stderr}")
         except Exception as e:
             LOGGER.error(f"{self.filename} metadata reading : {e}")
         return self.get_date_from_name()
