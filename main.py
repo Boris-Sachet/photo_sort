@@ -84,6 +84,6 @@ def main():
 if __name__ == '__main__':
     sys.path.append("/var/packages/MediaServer/target/bin/ffmpeg")
     sys.path.append("/var/packages/MediaServer/target/bin/ffprobe")
-    logging.getLogger("TiffImagePlugin").setLevel(logging.INFO)
-    logging.getLogger("TiffImagePlugin").propagate = False
+    logging.getLogger("PIL.TiffImagePlugin").setLevel(logging.INFO)
+    logging.getLogger("PIL.TiffImagePlugin").propagate = False
     main()
