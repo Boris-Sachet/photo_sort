@@ -30,8 +30,25 @@ class File:
         try:
             return dparser.parse(self.filename, fuzzy=True)
         except ValueError:
-            LOGGER.debug(f"{self.filename} : No date found in filename")
-            return None
+            LOGGER.debug(f"{self.filename} : No date found in complete filename")
+
+        # Desperate try to find a date
+        for split_char in ["_", " ", "-", "."]:
+            substring_date = self.find_date_in_substring(split_char)
+            if substring_date is not None:
+                return substring_date
+        return None
+
+
+    def find_date_in_substring(self, split_char: str):
+        """Split the filename and try to interpret anything as a date, hopefully getting somethign"""
+        for sub_string in self.filename.split(split_char):
+            try:
+                return dparser.parse(sub_string, fuzzy=True)
+            except ValueError:
+                pass
+        return None
+
 
     def get_creation_date(self) -> datetime | None:
         """Get the last modification time of the file, can be unreliable to determine when the file was created"""
