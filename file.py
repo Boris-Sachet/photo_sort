@@ -45,7 +45,7 @@ class File:
         for sub_string in self.filename.split(split_char):
             try:
                 return dparser.parse(sub_string, fuzzy=True)
-            except ValueError:
+            except (ValueError, OverflowError):
                 pass
         return None
 
