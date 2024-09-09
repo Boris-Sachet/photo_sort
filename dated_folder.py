@@ -51,16 +51,20 @@ class DatedFolder:
 
     def normalise_folder_name(self) -> str:
         """Normalise folder name for better parsing of dates"""
-        match self.name.split(" ")[1].lower():
-            case "et":
-                normalised_name = self.name.replace(" et ", "..", 1)
-            case "au":
-                normalised_name = self.name.replace(" au ", "..", 1)
-            case "à":
-                normalised_name = self.name.replace(" à ", "..", 1)
-            case _:
-                normalised_name = self.name
-        return normalised_name
+        splited_name = self.name.split(" ")
+        if len(splited_name) > 1:
+            match splited_name[1].lower():
+                case "et":
+                    normalised_name = self.name.replace(" et ", "..", 1)
+                case "au":
+                    normalised_name = self.name.replace(" au ", "..", 1)
+                case "à":
+                    normalised_name = self.name.replace(" à ", "..", 1)
+                case _:
+                    normalised_name = self.name
+            return normalised_name
+        else:
+            return self.name
 
     def parse_begin_date(self, date: str) -> datetime:
         """Looks for accepted date format in strings"""
