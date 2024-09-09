@@ -33,69 +33,65 @@ class DatedFolder:
         self.end = self.end.replace(hour=23, minute=59, second=59)
 
     def extract_dates(self):
-        date = self.name.split(" ")[0]
+        """Extract begin and end dates from the folder name"""
+        date = self.normalise_folder_name().split(" ")[0]
         try:
-            # One day folder
-            if len(date) == 10:
-                self.begin = date_time.strptime(date, "%Y-%m-%d")
+            # Multiple days interval folder
+            if ".." not in date:
+                self.begin = self.parse_begin_date(date)
                 self.end = self.begin
-
-            # One month folder
-            elif len(date) == 7:
-                self.begin = date_time.strptime(date, "%Y-%m")
-                self.end = last_day_of_month(self.begin)
-
-            # One year folder
-            elif len(date) == 4:
-                self.isValid = False
-                # self.begin = date_time.strptime(date, "%Y")
-                # self.end = self.begin.replace(month=12, day=31)
-
-            # Interval folder
-            elif ".." in date:
-                dates = date.split("..")
-
-                # Month only date with interval
-                if len(dates[0]) == 7 and len(dates[1]) == 2:
-                    self.begin = date_time.strptime(dates[0], "%Y-%m")
-                    self.end = last_day_of_month(self.begin.replace(month=int(dates[1])))
-
-                # Full date with same month interval
-                elif len(dates[0]) == 10 and len(dates[1]) == 2:
-                    self.begin = date_time.strptime(dates[0], "%Y-%m-%d")
-                    self.end = self.begin.replace(day=int(dates[1]))
-
-                # Full date with different month interval
-                elif len(dates[0]) == 10 and len(dates[1]) == 5:
-                    month, day = dates[1].split('-')
-                    self.begin = date_time.strptime(dates[0], "%Y-%m-%d")
-                    self.end = self.begin.replace(month=int(month), day=int(day))
-
-                # Two full dates
-                elif len(dates[0]) == 10 and len(dates[1]) == 10:
-                    self.begin = date_time.strptime(dates[0], "%Y-%m-%d")
-                    self.end = date_time.strptime(dates[1], "%Y-%m-%d")
-
-                else:
-                    LOGGER.error(f"Folder name '{self.name}' is invalid")
-                    self.isValid = False
-
-            # Multiple days of the same month folder
-            elif '.' in date:
-                dates = date.split(".")
-                if len(dates[0]) == 10:
-                    self.begin = date_time.strptime(dates[0], "%Y-%m-%d")
-                    self.end = self.begin.replace(day=int(dates[len(dates) - 1]))
-                else:
-                    LOGGER.error(f"Folder name '{self.name}' is invalid")
-                    self.isValid = False
-
             else:
-                LOGGER.error(f"Folder name '{self.name}' is invalid '{date}'")
-                self.isValid = False
+                splited_date = date.split("..")
+                self.begin = self.parse_begin_date(splited_date[0])
+                self.end = self.parse_end_date(splited_date[1])
+
         except ValueError as e:
             LOGGER.error(f"Folder name '{self.name}' is invalid : {e}")
             self.isValid = False
+
+    def normalise_folder_name(self) -> str:
+        """Normalise folder name for better parsing of dates"""
+        match self.name.split(" ")[1].lower():
+            case "et":
+                normalised_name = self.name.replace("et", "..", 1)
+            case "au":
+                normalised_name = self.name.replace("au", "..", 1)
+            case "à":
+                normalised_name = self.name.replace("à", "..", 1)
+            case _:
+                normalised_name = self.name
+        return normalised_name
+
+    def parse_begin_date(self, date: str) -> datetime:
+        """Looks for accepted date format in strings"""
+        match len(date):
+            case 10:
+                return date_time.strptime(date, "%Y-%m-%d")
+            case 8:
+                return date_time.strptime(date, "%Y%m%d")
+
+    def parse_end_date(self, date: str) -> datetime:
+        """looks for accepted date format in second strings"""
+        match len(date):
+            # YYYY-MM-DD
+            case 10:
+                return date_time.strptime(date, "%Y-%m-%d")
+            # YYYMMDD
+            case 8:
+                return date_time.strptime(date, "%Y%m%d")
+            # MM-DD
+            case 5:
+                month, day = date.split('-')
+                return self.begin.replace(month=int(month), day=int(day))
+            # MMDD
+            case 4:
+                return self.begin.replace(month=int(date[:2]), day=int(date[2:]))
+            # DD
+            case 2:
+                return self.begin.replace(day=int(date))
+            # D
+            case 1:
+                return self.begin.replace(day=int(date))
 
     def find_user_subfolder(self) -> Path:
         """Look for a user subfolder in this folder"""
