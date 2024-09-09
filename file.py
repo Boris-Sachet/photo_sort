@@ -150,7 +150,7 @@ class Photo(File):
                     if key in exif.keys():
                         return datetime.strptime(exif.get(key).split(' ')[0], "%Y:%m:%d")
         except Exception as error:
-            LOGGER.error(f"{self.filename} metadata reading : {error}, falling back to searching in filename")
+            LOGGER.debug(f"error: {self.filename} metadata reading : {error}, falling back to searching in filename")
 
         return self.get_date_from_name()
 
@@ -169,7 +169,7 @@ class Video(File):
                 if key in vid[0]['tags']:
                     return datetime.strptime(vid[0]['tags'].get(key).split('T')[0], "%Y-%m-%d")
         except ffmpeg.Error as error:
-            LOGGER.error(f"{self.filename} ffmpeg metadata reading : {error.stderr}, falling back to searching in filename")
+            LOGGER.debug(f"error {self.filename} ffmpeg metadata reading : {error.stderr}, falling back to searching in filename")
         except Exception as error:
-            LOGGER.error(f"{self.filename} metadata reading : {error}, falling back to searching in filename")
+            LOGGER.debug(f"error {self.filename} metadata reading : {error}, falling back to searching in filename")
         return self.get_date_from_name()
