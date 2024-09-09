@@ -70,7 +70,7 @@ class File:
         :param dst:
         :return:
         """
-        operation = "Copied" if not Config.move_files_to_storage else "moved"
+        operation = "Moved" if Config.move_files_to_storage else "Copied"
 
         if not Config.test_mode:
             if Config.move_files_to_storage:
