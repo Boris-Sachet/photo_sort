@@ -70,11 +70,16 @@ class File:
         :param dst:
         :return:
         """
+        operation = "Copied" if not Config.move_files_to_storage else "moved"
+
         if not Config.test_mode:
-            copied_path = shutil.copy(self.path, dst)
-            LOGGER.info(f"Copied '{self.filename}' to '{copied_path}'")
+            if Config.move_files_to_storage:
+                destination_path = shutil.move(self.path, dst)
+            else:
+                destination_path = shutil.copy(self.path, dst)
+            LOGGER.info(f"{operation} '{self.filename}' to '{destination_path}'")
         else:
-            LOGGER.info(f"Copied '{self.filename}' to '{dst}' (test mode)")
+            LOGGER.info(f"{operation} '{self.filename}' to '{dst}' (test mode)")
 
     def __find_folder_to_sort_into(self, storage_paths: List[DatedFolder]) -> DatedFolder:
         """Find the dated folder with the date interval matching the date of this file"""
