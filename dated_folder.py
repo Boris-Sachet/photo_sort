@@ -53,11 +53,11 @@ class DatedFolder:
         """Normalise folder name for better parsing of dates"""
         match self.name.split(" ")[1].lower():
             case "et":
-                normalised_name = self.name.replace("et", "..", 1)
+                normalised_name = self.name.replace(" et ", "..", 1)
             case "au":
-                normalised_name = self.name.replace("au", "..", 1)
+                normalised_name = self.name.replace(" au ", "..", 1)
             case "à":
-                normalised_name = self.name.replace("à", "..", 1)
+                normalised_name = self.name.replace(" à ", "..", 1)
             case _:
                 normalised_name = self.name
         return normalised_name
@@ -69,6 +69,8 @@ class DatedFolder:
                 return date_time.strptime(date, "%Y-%m-%d")
             case 8:
                 return date_time.strptime(date, "%Y%m%d")
+            case _:
+                raise ValueError
 
     def parse_end_date(self, date: str) -> datetime:
         """looks for accepted date format in second strings"""
@@ -92,6 +94,8 @@ class DatedFolder:
             # D
             case 1:
                 return self.begin.replace(day=int(date))
+            case _:
+                raise ValueError
 
     def find_user_subfolder(self) -> Path:
         """Look for a user subfolder in this folder"""
