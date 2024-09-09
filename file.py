@@ -30,7 +30,7 @@ class File:
         try:
             return dparser.parse(self.filename, fuzzy=True)
         except ValueError:
-            LOGGER.error(f"{self.filename} : No date found in filename")
+            LOGGER.debug(f"{self.filename} : No date found in filename")
             return None
 
     def get_creation_date(self) -> datetime | None:
