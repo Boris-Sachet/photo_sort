@@ -82,6 +82,7 @@ class Config:
 
         # Load config from conf file
         # General settings
+        cls.username = config_file["general"]["user_name"].strip()
         cls.log_level = config_file["general"]["log_level"].strip()
         cls.data_keys = extract_list(config_file["general"]["data_keys"])
         cls.test_mode = extract_bool(config_file["general"]["test_mode"])

@@ -84,7 +84,7 @@ def main():
     sources_reports.insert(0, f"{total_sorted_count} of {total_count} files sorted, {total_unsortable_count} unsortables files")
     execution_report = "\n".join(sources_reports)
     if pushbullet_conn:
-        pushbullet_conn.push_note(f"{socket.gethostname()} - PhotoSort executed", execution_report)
+        pushbullet_conn.push_note(f"{socket.gethostname()} - {Config.username} - PhotoSort executed", execution_report)
     LOGGER.info(execution_report)
     LOGGER.info(f"Execution end at {datetime.now()}")
 
