@@ -52,6 +52,8 @@ class Config:
     test_mode: bool = False
     pushbullet_api_key: str = ''
     pushbullet_encryption_key: str = ''
+    pushover_user: str = ''
+    pushover_token: str = ''
     sources: List[SourceConfig] = []
 
     @classmethod
@@ -80,30 +82,35 @@ class Config:
         config_file = configparser.ConfigParser()
         config_file.read(config_path / config_file_name)
 
-        # Load config from conf file
-        # General settings
-        cls.username = config_file["general"]["user_name"].strip()
-        cls.log_level = config_file["general"]["log_level"].strip()
-        cls.data_keys = extract_list(config_file["general"]["data_keys"])
-        cls.test_mode = extract_bool(config_file["general"]["test_mode"])
-        cls.pushbullet_api_key = config_file["general"]["pushbullet_api_key"].strip()
-        cls.pushbullet_encryption_key = config_file["general"]["pushbullet_encryption_key"].strip()
+        try:
+            # Load config from conf file
+            # General settings
+            cls.username = config_file["general"]["user_name"].strip()
+            cls.log_level = config_file["general"]["log_level"].strip()
+            cls.data_keys = extract_list(config_file["general"]["data_keys"])
+            cls.test_mode = extract_bool(config_file["general"]["test_mode"])
+            cls.pushbullet_api_key = config_file["general"]["pushbullet_api_key"].strip()
+            cls.pushbullet_encryption_key = config_file["general"]["pushbullet_encryption_key"].strip()
+            cls.pushover_user = config_file["general"]["pushover_user"].strip()
+            cls.pushover_token = config_file["general"]["pushover_token"].strip()
 
-        # Storage settings
-        cls.private_storage_paths = extract_paths(config_file["storage"]["private_storage_paths"])
-        cls.public_storage_paths = extract_paths(config_file["storage"]["public_storage_paths"])
-        cls.storage_ignore = extract_list(config_file["storage"]["storage_ignore"])
-        cls.use_subdir_for_public_storages = extract_bool(config_file["storage"]["use_subdir_for_public"])
-        cls.public_storages_subdir_names = extract_list(config_file["storage"]["subdir_names"])
-        cls.move_files_to_storage = extract_bool(config_file["storage"]["move_files_to_storage"])
+            # Storage settings
+            cls.private_storage_paths = extract_paths(config_file["storage"]["private_storage_paths"])
+            cls.public_storage_paths = extract_paths(config_file["storage"]["public_storage_paths"])
+            cls.storage_ignore = extract_list(config_file["storage"]["storage_ignore"])
+            cls.use_subdir_for_public_storages = extract_bool(config_file["storage"]["use_subdir_for_public"])
+            cls.public_storages_subdir_names = extract_list(config_file["storage"]["subdir_names"])
+            cls.move_files_to_storage = extract_bool(config_file["storage"]["move_files_to_storage"])
 
-        # Source settings
-        sources_configs = [section for section in config_file.keys() if section.startswith("source.")]
-        for source in sources_configs:
-            cls.sources.append(SourceConfig(
-                source_name=source,
-                source_path=config_file[source]["source_path"],
-                source_ignore=config_file[source]["source_ignore"],
-                use_subdir=config_file[source]["use_subdir"],
-                subdir_names=config_file[source]["subdir_names"],
-            ))
+            # Source settings
+            sources_configs = [section for section in config_file.keys() if section.startswith("source.")]
+            for source in sources_configs:
+                cls.sources.append(SourceConfig(
+                    source_name=source,
+                    source_path=config_file[source]["source_path"],
+                    source_ignore=config_file[source]["source_ignore"],
+                    use_subdir=config_file[source]["use_subdir"],
+                    subdir_names=config_file[source]["subdir_names"],
+                ))
+        except KeyError as error:
+            LOGGER.error(f"Error missing configuration in config file: {error}")

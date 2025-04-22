@@ -9,9 +9,9 @@ import loging_config  # noqa: F401
 
 from config import Config, SourceConfig
 from dated_folder import DatedFolder
-from pushbullet import Pushbullet
 
 from file import File
+from notification.notifier import Notifier
 
 LOGGER = logging.getLogger(__name__)
 
@@ -47,10 +47,7 @@ def main():
     Config.init()
     File.data_keys = Config.data_keys
 
-    # Pushbullet auth
-    pushbullet_conn = None
-    if Config.pushbullet_api_key:
-        pushbullet_conn = Pushbullet(Config.pushbullet_api_key, Config.pushbullet_encryption_key)
+    notifier = Notifier()
 
     # Read folders and sort files
     total_count = 0
@@ -83,8 +80,8 @@ def main():
 
     sources_reports.insert(0, f"{total_sorted_count} of {total_count} files sorted, {total_unsortable_count} unsortables files")
     execution_report = "\n".join(sources_reports)
-    if pushbullet_conn:
-        pushbullet_conn.push_note(f"{socket.gethostname()} - {Config.username} - PhotoSort executed", execution_report)
+
+    notifier.notify(f"{socket.gethostname()} - {Config.username} - PhotoSort executed", execution_report)
     LOGGER.info(execution_report)
     LOGGER.info(f"Execution end at {datetime.now()}")
 
