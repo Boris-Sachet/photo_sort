@@ -100,7 +100,7 @@ class Config:
             cls.storage_ignore = extract_list(config_file["storage"]["storage_ignore"])
             cls.use_subdir_for_public_storages = extract_bool(config_file["storage"]["use_subdir_for_public"])
             cls.public_storages_subdir_names = extract_list(config_file["storage"]["subdir_names"])
-            cls.move_files_to_storage = extract_bool(config_file["storage"]["move_files_to_storage"])
+            cls.operation_type = config_file["storage"]["operation_type"]
 
             # Source settings
             sources_configs = [section for section in config_file.keys() if section.startswith("source.")]

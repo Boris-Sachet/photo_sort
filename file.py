@@ -39,7 +39,6 @@ class File:
                 return substring_date
         return None
 
-
     def find_date_in_substring(self, split_char: str):
         """Split the filename and try to interpret anything as a date, hopefully getting somethign"""
         for sub_string in self.filename.split(split_char):
@@ -48,7 +47,6 @@ class File:
             except (ValueError, OverflowError):
                 pass
         return None
-
 
     def get_creation_date(self) -> datetime | None:
         """Get the last modification time of the file, can be unreliable to determine when the file was created"""
@@ -84,21 +82,27 @@ class File:
         """
         Copy the file to destination folder.
         If test mode is not enabled (else pretend to do it in the logs)
-        :param dst:
-        :return:
+        :param dst: destination path
         """
-        operation = "Moved" if Config.move_files_to_storage else "Copied"
+        operation = "Moved" if Config.operation_type else "Copied"
 
         if not Config.test_mode:
-            if Config.move_files_to_storage:
-                destination_path = shutil.move(self.path, dst)
-            else:
-                destination_path = shutil.copy(self.path, dst)
-            LOGGER.info(f"{operation} '{self.filename}' to '{destination_path}'")
-        else:
-            LOGGER.info(f"{operation} '{self.filename}' to '{dst}' (test mode)")
+            match Config.operation_type.lower():
+                # Copy and move are available in pathlib in 3.14
+                case "copy":
+                    shutil.copy(self.path, dst)
+                case "move":
+                    shutil.move(self.path, dst)
+                case "link":
+                    dst.hardlink_to(self.path)
+                case _:
+                    raise ValueError(f"{operation} operation not supported")
 
-    def __find_folder_to_sort_into(self, storage_paths: List[DatedFolder]) -> DatedFolder:
+            LOGGER.info(f"{Config.operation_type}ed '{self.filename}' to '{dst}'")
+        else:
+            LOGGER.info(f"{Config.operation_type}ed '{self.filename}' to '{dst}' (test mode)")
+
+    def __find_folder_to_sort_into(self, storage_paths: List[DatedFolder]) -> DatedFolder | None:
         """Find the dated folder with the date interval matching the date of this file"""
         if self.date is not None:
             for folder in storage_paths:
@@ -107,6 +111,7 @@ class File:
                     return folder
         else:
             LOGGER.error(f"No date found for '{self.filename}', can't sort it")
+        return None
 
     @classmethod
     def __find_storage_path(cls, folder: DatedFolder, source: SourceConfig) -> Path | None:
@@ -144,6 +149,7 @@ class File:
             return Video(filename, dir_path)
         elif filename.endswith((".jpg", ".jpeg", ".png", ".webp")):
             return Photo(filename, dir_path)
+        return None
 
 
 class Photo(File):
