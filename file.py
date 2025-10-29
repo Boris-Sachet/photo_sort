@@ -71,18 +71,18 @@ class File:
 
         # If correct storage path if found, copy the file if it doesn't exist already (unless test mode)
         if not (storage_path / self.filename).is_file():
-            self.copy(dst=storage_path)
+            self.handle(dst=storage_path)
             return True
 
         # File is already there, nothing to do
         LOGGER.debug(f"File '{self.filename}' is already sorted in '{folder.name}', nothing to do")
         return False
 
-    def copy(self, dst: Path):
+    def handle(self, dst: Path):
         """
-        Copy the file to destination folder.
+        Handle the file to destination folder.
         If test mode is not enabled (else pretend to do it in the logs)
-        :param dst: destination path
+        :param dst: destination directory path (without file name)
         """
         operation = "Moved" if Config.operation_type else "Copied"
 
@@ -94,7 +94,7 @@ class File:
                 case "move":
                     shutil.move(self.path, dst)
                 case "link":
-                    dst.hardlink_to(self.path)
+                    (dst / self.path.name).hardlink_to(self.path)
                 case _:
                     raise ValueError(f"{operation} operation not supported")
 
