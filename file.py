@@ -84,8 +84,6 @@ class File:
         If test mode is not enabled (else pretend to do it in the logs)
         :param dst: destination directory path (without file name)
         """
-        operation = "Moved" if Config.operation_type else "Copied"
-
         if not Config.test_mode:
             match Config.operation_type.lower():
                 # Copy and move are available in pathlib in 3.14
@@ -95,8 +93,10 @@ class File:
                     shutil.move(self.path, dst)
                 case "link":
                     (dst / self.path.name).hardlink_to(self.path)
+                case "reflink":
+                    os.system(f"cp --reflink '{str(self.path)}' '{str(dst)}'")
                 case _:
-                    raise ValueError(f"{operation} operation not supported")
+                    raise ValueError(f"{Config.operation_type} operation not supported")
 
             LOGGER.info(f"{Config.operation_type}ed '{self.filename}' to '{dst}'")
         else:

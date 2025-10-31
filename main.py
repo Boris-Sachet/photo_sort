@@ -16,7 +16,7 @@ from notification.notifier import Notifier
 LOGGER = logging.getLogger(__name__)
 
 
-def sort_source(source: SourceConfig, dir_list: List[DatedFolder], count: int, sorted_count: int, unsortable_count: int):
+def sort_source(source: SourceConfig, dir_list: List[DatedFolder]):
     """
     Sort files from a given source
     :param source: Files source configuration of files to sort
@@ -63,12 +63,7 @@ def main():
         for source in Config.sources:
             if source.source_path is not None:
                 LOGGER.info(f"Sorting source {source.name}")
-                count, sorted_count, unsortable_count = sort_source(source=source,
-                                                                    dir_list=dir_list,
-                                                                    count=total_count,
-                                                                    sorted_count=total_sorted_count,
-                                                                    unsortable_count=total_unsortable_count,
-                                                                    )
+                count, sorted_count, unsortable_count = sort_source(source=source, dir_list=dir_list)
                 total_count += count
                 total_sorted_count += sorted_count
                 total_unsortable_count += unsortable_count
