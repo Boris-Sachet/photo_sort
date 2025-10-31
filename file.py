@@ -85,20 +85,23 @@ class File:
         :param dst: destination directory path (without file name)
         """
         if not Config.test_mode:
-            match Config.operation_type.lower():
-                # Copy and move are available in pathlib in 3.14
-                case "copy":
-                    shutil.copy(self.path, dst)
-                case "move":
-                    shutil.move(self.path, dst)
-                case "link":
-                    (dst / self.path.name).hardlink_to(self.path)
-                case "reflink":
-                    os.system(f"cp --reflink '{str(self.path)}' '{str(dst)}'")
-                case _:
-                    raise ValueError(f"{Config.operation_type} operation not supported")
+            try:
+                match Config.operation_type.lower():
+                    # Copy and move are available in pathlib in 3.14
+                    case "copy":
+                        shutil.copy(self.path, dst)
+                    case "move":
+                        shutil.move(self.path, dst)
+                    case "link":
+                        (dst / self.path.name).hardlink_to(self.path)
+                    case "reflink":
+                        os.system(f"cp --reflink '{str(self.path)}' '{str(dst)}'")
+                    case _:
+                        raise ValueError(f"{Config.operation_type} operation not supported")
 
-            LOGGER.info(f"{Config.operation_type}ed '{self.filename}' to '{dst}'")
+                LOGGER.info(f"{Config.operation_type}ed '{self.filename}' to '{dst}'")
+            except Exception as error:
+                LOGGER.error(f"{Config.operation_type} '{self.filename}' to '{dst}': {error}")
         else:
             LOGGER.info(f"{Config.operation_type}ed '{self.filename}' to '{dst}' (test mode)")
 
