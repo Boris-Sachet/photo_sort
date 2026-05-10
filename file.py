@@ -7,6 +7,7 @@ from pathlib import Path
 from typing import List
 
 import ffmpeg
+import reflink_copy
 from PIL import Image, ExifTags
 
 from config import Config, SourceConfig
@@ -95,7 +96,7 @@ class File:
                     case "link":
                         (dst / self.path.name).hardlink_to(self.path)
                     case "reflink":
-                        os.system(f'cp --reflink \""{str(self.path)}"\" \""{str(dst)}"\"')
+                        reflink_copy.reflink_or_copy(src=self.path, dst=dst)
                     case _:
                         raise ValueError(f"{Config.operation_type} operation not supported")
 
