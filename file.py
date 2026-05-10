@@ -95,7 +95,7 @@ class File:
                     case "link":
                         (dst / self.path.name).hardlink_to(self.path)
                     case "reflink":
-                        os.system(f"cp --reflink '{str(self.path)}' '{str(dst)}'")
+                        os.system(f'cp --reflink \""{str(self.path)}"\" \""{str(dst)}"\"')
                     case _:
                         raise ValueError(f"{Config.operation_type} operation not supported")
 
