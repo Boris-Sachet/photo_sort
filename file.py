@@ -112,13 +112,16 @@ class File:
 
     def __find_folder_to_sort_into(self, storage_paths: List[DatedFolder]) -> DatedFolder | None:
         """Find the dated folder with the date interval matching the date of this file"""
-        if self.date is not None:
-            for folder in storage_paths:
-                # Search the folder matching the date of the file (only first one found counts)
-                if folder.begin <= self.date <= folder.end:
-                    return folder
-        else:
-            LOGGER.error(f"No date found for '{self.filename}', can't sort it")
+        try:
+            if self.date is not None:
+                for folder in storage_paths:
+                    # Search the folder matching the date of the file (only first one found counts)
+                    if folder.begin <= self.date <= folder.end:
+                        return folder
+            else:
+                LOGGER.error(f"No date found for '{self.filename}', can't sort it")
+        except TypeError as error:
+            LOGGER.error(f"Can't compare {self.filename}: {self.date} and {folder.name}: {folder.begin} {folder.end} : {error}")
         return None
 
     @classmethod
