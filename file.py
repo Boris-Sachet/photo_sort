@@ -72,7 +72,10 @@ class File:
 
         # If correct storage path if found, copy the file if it doesn't exist already (unless test mode)
         if not (storage_path / self.filename).is_file():
-            self.handle(dst=storage_path)
+            try:
+                self.handle(dst=storage_path)
+            except Exception:
+                return False
             return True
 
         # File is already there, nothing to do
@@ -96,13 +99,14 @@ class File:
                     case "link":
                         (dst / self.path.name).hardlink_to(self.path)
                     case "reflink":
-                        reflink_copy.reflink_or_copy(src=self.path, dst=dst)
+                        reflink_copy.reflink_or_copy(src=self.path, dst=(dst / self.path.name))
                     case _:
                         raise ValueError(f"{Config.operation_type} operation not supported")
 
                 LOGGER.info(f"{Config.operation_type}ed '{self.filename}' to '{dst}'")
             except Exception as error:
                 LOGGER.error(f"{Config.operation_type} '{self.filename}' to '{dst}': {error}")
+                raise error
         else:
             LOGGER.info(f"{Config.operation_type}ed '{self.filename}' to '{dst}' (test mode)")
 
